@@ -1,0 +1,265 @@
+#! /usr/bin/perl
+# PODNAME: benchmarkanything-storage
+# ABSTRACT: BenchmarkAnything storage cmdline tool
+
+use 5.008;
+use strict;
+use warnings;
+
+use App::Rad;
+
+######################################################################
+#
+# App::Rad interface
+#
+######################################################################
+
+App::Rad->run();
+
+sub setup
+{
+        my $c = shift;
+        $c->unregister_command("help");
+        $c->register_commands("help", "search", "add");
+}
+
+sub help
+{
+        my ($c) = @_;
+
+        return qq{benchmarkanything-storage [-o|--outtype <TYPE>]
+                          [-i|--intype <TYPE>]
+                          [-c|--cfgfile <FILE>]
+                          [search|add] <DATAFILE>
+
+        -i
+        --intype         - input format
+                           [json(default), yaml, dumper]
+        -o
+        --outtype        - output format
+                           [json(default), yaml, dumper]
+        -c
+        --cfgfile        - config file for storage backend
+
+        -b
+        --backend        - backend
+                           [tapper(default), http]
+
+        <DATAFILE>       - input data file ("-" for STDIN)
+                           Content depends on the sub command:
+                           + for 'search' it is a search query
+                           + for 'add' it is BenchmarkAnything data
+};
+}
+
+sub _getopt
+{
+        my ($c) = @_;
+
+        $c->getopt( "cfgfile|c=s",
+                    "backend|b=s",
+                    "outtype|o=s",
+                    "intype|i=s",
+                  )
+         or help() and return undef;
+
+        require File::HomeDir;
+        require File::Slurp;
+        require YAML::Any;
+
+        my $opt = $c->options;
+        my $configfile  = $opt->{cfgfile}  || File::HomeDir->my_home . "/.benchmarkanything.cfg";
+        my $configyaml  = File::Slurp::read_file($configfile);
+        $c->{_config}   = YAML::Any::Load($configyaml);
+        $c->{_backend}  = $opt->{backend}  || 'tapper';
+        $c->{_file}     = $c->argv->[0] || '-';
+}
+
+sub search :Help(search BenchmarkAnything data)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _search($c);
+}
+
+sub add :Help(add one or more BenchmarkAnything entries)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _read_in($c);
+        _add($c);
+}
+
+######################################################################
+#
+# Implementation
+#
+######################################################################
+
+=head2 _read_in
+
+This function reads in a data structure. The meaning of the data
+depends on the sub command: for C<search> it is a search query, for
+C<add> it is an array of BenchmarkAnything data points.
+
+=cut
+
+sub _read_in
+{
+        my ($c) = @_;
+
+        my $opt = $c->options;
+
+        my $file = $c->{_file};
+        my $intype  = $opt->{intype}  || 'json';
+        my $data;
+        my $filecontent;
+        {
+                local $/;
+                if ($file eq '-') {
+                        $filecontent = <STDIN>;
+                }
+                else
+                {
+                        open (my $FH, "<", $file) or die "benchmarkanything-storage: cannot open input file $file.\n";
+                        $filecontent = <$FH>;
+                        close $FH;
+                }
+        }
+
+        if (not defined $filecontent or $filecontent !~ /[^\s\t\r\n]/ms) {
+                die "benchmarkanything-storage: no meaningful input to read.\n";
+        }
+
+        if ($intype eq "yaml") {
+                require YAML::Any;
+                $data = [YAML::Any::Load($filecontent)];
+        }
+        elsif ($intype eq "json") {
+                require JSON;
+                $data = JSON::decode_json($filecontent);
+        }
+        elsif ($intype eq "dumper") {
+                eval '$data = my '.$filecontent;
+        }
+        else
+        {
+                die "benchmarkanything-storage: unrecognized input format: $intype.\n";
+        }
+        return $data;
+}
+
+sub _search
+{
+        my ($c) = @_;
+
+        my $data = _read_in($c);
+
+        # --- validate ---
+        if (not $data)
+        {
+                die "benchmarkanything-storage: no query data provided.\n";
+        }
+
+        if ($c->{_backend} eq "tapper")
+        {
+                require Tapper::Benchmark;
+                require BenchmarkAnything::Schema;
+
+                return BenchmarkAnything::Schema::valid_json_schema($data);
+        }
+        else
+        {
+                die "Backend '.$c->{_backend}.' not yet implemented, available backends are: 'tapper'\n";
+        }
+}
+
+sub _add
+{
+        my ($c) = @_;
+
+        my $data = _read_in($c);
+
+        # --- validate ---
+        if (not $data)
+        {
+                die "benchmarkanything-storage: no input data provided.\n";
+        }
+
+        require BenchmarkAnything::Schema;
+        if (not my $result = BenchmarkAnything::Schema::valid_json_schema($data))
+        {
+                die "benchmarkanything-storage: add: invalid input: ".join("; ", $result->errors)."\n";
+        }
+
+
+        # --- add to storage ---
+
+        if ($c->{_backend} eq "tapper")
+        {
+                no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
+
+                # backend: tapper
+
+                require DBI;
+                require Tapper::Benchmark;
+
+                # connect
+                my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+                my $dbh              = DBI->connect($dsn) or die $DBI::errstr;
+                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh });
+
+                # add data
+                my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
+                if (not $success)
+                {
+                        die "Error while adding data to backend '".$c->{_backend}."': ".$@;
+                }
+        }
+        else
+        {
+                die "Backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
+        }
+
+        return BenchmarkAnything::Schema::valid_json_schema($data);
+}
+
+__END__
+
+=head1 SYNOPSIS
+
+Cmdline tool to handle BenchmarkAnything data, see
+L<http://benchmarkanything.org|http://benchmarkanything.org>
+
+Default data format (in and out) is JSON, other formats can be
+specified.
+
+Add data to configured backend storage:
+
+  $ benchmarkanything-storage add data.json
+
+Query backend storage for data:
+
+  $ echo 'json_search_query' | benchmarkanything-storage search -
+
+Declare input format YAML:
+
+  $ benchmarkanything-storage add -i yaml data.yaml
+
+=head2 Input formats
+
+The following B<input formats> are allowed, with their according
+modules used to convert the input into a data structure:
+
+ yaml   - YAML::Any (default)
+ json   - JSON
+ dumper - Data::Dumper (including the leading $VAR1 variable assignment)
+
+=head1 SEE ALSO
+
+For more information about the BenchmarkAnything schema, see
+L<http://www.benchmarkanything.org/|http://www.benchmarkanything.org/>.
+
+=cut
