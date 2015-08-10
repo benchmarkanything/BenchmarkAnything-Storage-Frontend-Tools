@@ -3,3 +3,4 @@
 BenchmarkAnything-Storage-Frontend-Tools-*
 Debian_CPANTS.txt
 nytprof*
+t/benchmarkanything.sqlite
