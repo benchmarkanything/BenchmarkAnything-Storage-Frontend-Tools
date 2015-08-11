@@ -88,7 +88,6 @@ sub add :Help(add one or more BenchmarkAnything entries)
         my ($c) = @_;
 
         _getopt($c);
-        _read_in($c);
         _add($c);
 }
 
