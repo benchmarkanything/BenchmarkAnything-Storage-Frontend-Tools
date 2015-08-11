@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add");
+        $c->register_commands("help", "search", "add", "createdb");
 }
 
 sub help
@@ -30,7 +30,8 @@ sub help
         return qq{benchmarkanything-storage [-o|--outtype <TYPE>]
                           [-i|--intype <TYPE>]
                           [-c|--cfgfile <FILE>]
-                          [search|add] <DATAFILE>
+                          [--really <DSN>]
+                          [search|add|createdb] <DATAFILE>
 
         -i
         --intype         - input format
@@ -45,10 +46,16 @@ sub help
         --backend        - backend
                            [tapper(default), http]
 
+        --really         - used for 'createdb' command.
+                           Avoids the 'Are you sure?' question. You need to
+                           provide the DSN from config that createdb would use,
+                           to avoid painful mistakes.
+
         <DATAFILE>       - input data file ("-" for STDIN)
                            Content depends on the sub command:
                            + for 'search' it is a search query
                            + for 'add' it is BenchmarkAnything data
+                           + for 'createdb' no input data is used
 };
 }
 
@@ -60,6 +67,7 @@ sub _getopt
                     "backend|b=s",
                     "outtype|o=s",
                     "intype|i=s",
+                    "really=s",
                   )
          or help() and return undef;
 
@@ -72,7 +80,7 @@ sub _getopt
         my $configyaml  = File::Slurp::read_file($configfile);
         $c->{_config}   = YAML::Any::Load($configyaml);
         $c->{_backend}  = $opt->{backend}  || 'tapper';
-        $c->{_file}     = $c->argv->[0] || '-';
+        $c->{_file}     = $c->argv->[0]    || '-';
 }
 
 sub search :Help(search BenchmarkAnything data)
@@ -89,6 +97,14 @@ sub add :Help(add one or more BenchmarkAnything entries)
 
         _getopt($c);
         _add($c);
+}
+
+sub createdb :Help(drop and create tables in the backend store)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _createdb($c);
 }
 
 ######################################################################
@@ -223,6 +239,76 @@ sub _add
         }
 
         return BenchmarkAnything::Schema::valid_json_schema($data);
+}
+
+sub _are_you_sure
+{
+        my ($c) = @_;
+
+        # DSN
+        my $dsn = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+
+        # option --really
+        return 1 if $c->options->{really} && $c->options->{really} eq $dsn;
+
+        # ask on stdin
+        print "REALLY DELETE AND RE-CREATE DATABASE [$dsn] (y/N): ";
+        read STDIN, my $answer, 1;
+        return 1 if $answer && $answer =~ /^y(es)?$/i;
+
+        # default: NO
+        return 0;
+}
+
+sub _createdb
+{
+        my ($c) = @_;
+
+        # --- add to storage ---
+
+        if ($c->{_backend} eq "tapper")
+        {
+                no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
+
+                # backend: tapper
+
+                if (_are_you_sure($c))
+                {
+
+                        require DBI;
+                        require File::Slurp;
+                        require File::ShareDir;
+                        require Tapper::Benchmark;
+                        use DBIx::MultiStatementDo;
+
+                        # connect
+                        my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+                        my $dbh              = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                        my $batch            = DBIx::MultiStatementDo->new(dbh => $dbh);
+
+                        # get schema SQL according to driver
+                        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
+                         or die "benchmarkanything-storage: can not parse DBI DSN '$dsn'";
+                        my $sql_file = File::ShareDir::dist_file('Tapper-Benchmark', "tapper-benchmark-create-schema.$driver");
+                        my $sql      = File::Slurp::read_file($sql_file);
+
+                        # execute schema SQL
+                        my @results = $batch->do($sql);
+                        if (not @results)
+                        {
+                                die "benchmarkanything-storage: error while creating DB on backend '".$c->{_backend}."': ".$batch->dbh->errstr;;
+                        }
+                        ;
+                }
+        }
+        else
+        {
+                # backend: unknown
+
+                die "Backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
+        }
+
+        return;
 }
 
 __END__
