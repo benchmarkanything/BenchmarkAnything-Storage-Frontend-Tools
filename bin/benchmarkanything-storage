@@ -187,7 +187,7 @@ sub _search
         }
         else
         {
-                die "Backend '.$c->{_backend}.' not yet implemented, available backends are: 'tapper'\n";
+                die "benchmarkanything-storage: backend '.$c->{_backend}.' not yet implemented, available backends are: 'tapper'\n";
         }
 }
 
@@ -223,19 +223,19 @@ sub _add
 
                 # connect
                 my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-                my $dbh              = DBI->connect($dsn) or die $DBI::errstr;
-                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh });
+                my $dbh              = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh});
 
                 # add data
                 my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
                 if (not $success)
                 {
-                        die "Error while adding data to backend '".$c->{_backend}."': ".$@;
+                        die "benchmarkanything-storage: error while adding data to backend '".$c->{_backend}."': ".$@;
                 }
         }
         else
         {
-                die "Backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
+                die "benchmarkanything-storage: backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
         }
 
         return BenchmarkAnything::Schema::valid_json_schema($data);
@@ -305,7 +305,7 @@ sub _createdb
         {
                 # backend: unknown
 
-                die "Backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
+                die "benchmarkanything-storage: backend ".$c->{_backend}." not yet implemented.\nAvailable backends are: 'tapper'\n";
         }
 
         return;
