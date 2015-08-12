@@ -275,10 +275,6 @@ sub _add
 
         if ($c->{_backend} eq "tapper")
         {
-                no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
-
-                # backend: tapper
-
                 require DBI;
                 require Tapper::Benchmark;
 
