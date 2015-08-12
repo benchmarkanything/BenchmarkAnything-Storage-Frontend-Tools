@@ -7,6 +7,7 @@ use DBI;
 
 my $program   = "$^X -Ilib bin/benchmarkanything-storage";
 my $infile    = "t/valid-benchmark-anything-data-01.json";
+my $queryfile = "t/benchmark-anything-query-01.json";
 my $cfgfile   = "t/benchmarkanything-tapper.cfg";
 
 sub command {
