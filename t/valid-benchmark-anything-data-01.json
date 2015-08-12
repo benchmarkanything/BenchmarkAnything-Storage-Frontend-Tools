@@ -39,7 +39,7 @@
             "NAME"     : "benchmarkanything.test.metric",
             "VALUE"    : 70,
             "comment"  : "integer value",
-            "compiler" : "gcc",
+            "compiler" : "icc",
             "keyword"  : "birne"
         }
     ]
