@@ -166,6 +166,57 @@ sub _read_in
         return $data;
 }
 
+=head2 _write_out
+
+This function writes a data structure in requested output format.
+
+=cut
+
+sub _write_out
+{
+        my ($c, $benchmarkanythingdata) = @_;
+
+        my $opt = $c->options;
+
+        my $output = "";
+        my $outtype = $opt->{outtype} || 'json';
+        if ($outtype eq "yaml")
+        {
+                require YAML::Any;
+                $output .= YAML::Any::Dump($benchmarkanythingdata);
+        }
+        elsif ($outtype eq "json")
+        {
+                eval "use JSON -convert_blessed_universally";
+                my $json = JSON->new->allow_nonref->pretty->allow_blessed->convert_blessed;
+                $output .= $json->encode($benchmarkanythingdata);
+        }
+        elsif ($outtype eq "ini") {
+                require Config::INI::Serializer;
+                my $ini = Config::INI::Serializer->new;
+                $output .= $ini->serialize($benchmarkanythingdata);
+        }
+        elsif ($outtype eq "dumper")
+        {
+                require Data::Dumper;
+                $output .= Data::Dumper::Dumper($benchmarkanythingdata);
+        }
+        elsif ($outtype eq "xml")
+        {
+                require XML::Simple;
+                my $xs = new XML::Simple;
+                $output .= $xs->XMLout($benchmarkanythingdata, AttrIndent => 1, KeepRoot => 1);
+        }
+        elsif ($outtype eq "flat") {
+                $output .= _format_flat( $c, $benchmarkanythingdata );
+        }
+        else
+        {
+                die "benchmarkanything-storage: unrecognized output format: $outtype.";
+        }
+        return $output;
+}
+
 sub _search
 {
         my ($c) = @_;
