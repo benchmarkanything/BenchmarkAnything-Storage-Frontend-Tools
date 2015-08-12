@@ -221,20 +221,30 @@ sub _search
 {
         my ($c) = @_;
 
-        my $data = _read_in($c);
+        my $query = _read_in($c);
 
         # --- validate ---
-        if (not $data)
+        if (not $query)
         {
                 die "benchmarkanything-storage: no query data provided.\n";
         }
 
         if ($c->{_backend} eq "tapper")
         {
+                require DBI;
                 require Tapper::Benchmark;
-                require BenchmarkAnything::Schema;
 
-                return BenchmarkAnything::Schema::valid_json_schema($data);
+                # connect
+                my $dsn                   = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+                my $dbh                   = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
+
+                # query
+                my $data_points           = $tapper_benchmark->search($query);
+                my $benchmarkanythingdata = { "BenchmarkAnythingData" => $data_points };
+
+                # output
+                _write_out($c, $benchmarkanythingdata);
         }
         else
         {
