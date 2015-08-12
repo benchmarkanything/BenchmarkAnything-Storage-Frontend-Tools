@@ -281,7 +281,7 @@ sub _add
                 # connect
                 my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
                 my $dbh              = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
-                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh});
+                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
 
                 # add data
                 my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
