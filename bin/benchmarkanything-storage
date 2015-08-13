@@ -304,7 +304,17 @@ sub _are_you_sure
         my $dsn = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
 
         # option --really
-        return 1 if $c->options->{really} && $c->options->{really} eq $dsn;
+        if ($c->options->{really})
+        {
+                if ($c->options->{really} eq $dsn)
+                {
+                        return 1;
+                }
+                else
+                {
+                        print STDERR "DSN does not match - asking interactive.\n";
+                }
+        }
 
         # ask on stdin
         print "REALLY DELETE AND RE-CREATE DATABASE [$dsn] (y/N): ";
