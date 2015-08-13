@@ -239,8 +239,7 @@ sub _search
                 my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
 
                 # query
-                my $data_points           = $tapper_benchmark->search_array($query);
-                my $benchmarkanythingdata = { "BenchmarkAnythingData" => $data_points };
+                my $benchmarkanythingdata = $tapper_benchmark->search_array($query);
 
                 # output
                 _write_out($c, $benchmarkanythingdata);
