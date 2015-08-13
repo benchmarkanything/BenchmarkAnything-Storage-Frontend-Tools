@@ -1,20 +1,9 @@
 {
     "select" : [
         "NAME",
-        "VALUE",
-        "comment",
-        "compiler",
-        "keyword"
+        "VALUE"
     ],
     "where" : [
-        ["=" , "NAME"    , "benchmarkanything.test.metric" ],
-        ["=",  "keyword" , "birne" ],
-        ["!=", "compiler", "icc" ]
-    ],
-    "order_by" : [
-        "VALUE",
-        ["compiler", "DESC", { "numeric" : 0 } ]
-    ],
-    "limit" : 2,
-    "offset" : 0
+        ["=" , "NAME"    , "benchmarkanything.test.metric" ]
+    ]
 }
