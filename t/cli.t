@@ -24,7 +24,10 @@ sub command {
 }
 
 sub verify {
-        my ($input, $output, $keys) = @_;
+        my ($input_json, $output_json, $keys) = @_;
+
+        my $input  = JSON::decode_json($input_json);
+        my $output = JSON::decode_json($output_json);
 
         for (my $i=0; $i < @{$input->{BenchmarkAnythingData}}-1; $i++) {
                 my $got      = $output->[$i];
@@ -41,16 +44,14 @@ command "$program createdb -c $cfgfile --really dbi:SQLite:t/benchmarkanything.s
 # Fill with benchmarks
 $infile     = "t/valid-benchmark-anything-data-01.json";
 $input_json = File::Slurp::read_file($infile);
-$input      = JSON::decode_json($input_json);
 command "$program add      -c $cfgfile $infile";
 
 # Search for benchmarks
 $inquery_file = "t/query-benchmark-anything-01.json";
-$output_json = command "$program search   -c $cfgfile $inquery_file";
-$output = JSON::decode_json($output_json);
+$output_json  = command "$program search   -c $cfgfile $inquery_file";
 
 # Verify
-verify($input, $output, [qw(NAME VALUE)]);
+verify($input_json, $output_json, [qw(NAME VALUE)]);
 
 # Finish
 done_testing;
