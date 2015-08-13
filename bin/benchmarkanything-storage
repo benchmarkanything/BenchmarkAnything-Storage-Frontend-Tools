@@ -370,8 +370,10 @@ sub _createdb
                         my $dsn      = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
                         my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
                          or die "benchmarkanything-storage: can not parse DBI DSN '$dsn'";
+                        my ($dbname) = $driver_dsn =~ m/database=(\w+)/g;
                         my $sql_file = File::ShareDir::dist_file('Tapper-Benchmark', "tapper-benchmark-create-schema.$driver");
                         my $sql      = File::Slurp::read_file($sql_file);
+                        $sql         =~ s/^use `testrundb`;/use `$dbname`;/m if $dbname; # replace Tapper::Benchmark's default
 
                         # execute schema SQL
                         my @results = $batch->do($sql);
