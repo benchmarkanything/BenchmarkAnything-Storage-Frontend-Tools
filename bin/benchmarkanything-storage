@@ -30,6 +30,7 @@ sub help
         return qq{benchmarkanything-storage [-o|--outtype <TYPE>]
                           [-i|--intype <TYPE>]
                           [-c|--cfgfile <FILE>]
+                          [-d|--debug]
                           [--really <DSN>]
                           [search|add|createdb] <DATAFILE>
 
@@ -45,6 +46,8 @@ sub help
         -b
         --backend        - backend
                            [tapper(default), http]
+
+        --debug          - Pass through debug option to used modules.
 
         --really         - used for 'createdb' command.
                            Avoids the 'Are you sure?' question. You need to
@@ -67,6 +70,7 @@ sub _getopt
                     "backend|b=s",
                     "outtype|o=s",
                     "intype|i=s",
+                    "debug|d",
                     "really=s",
                   )
          or help() and return undef;
