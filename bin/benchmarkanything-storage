@@ -235,8 +235,7 @@ sub _search
                 require Tapper::Benchmark;
 
                 # connect
-                my $dsn                   = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-                my $dbh                   = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                my $dbh                   = _connect($c);
                 my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
 
                 # query
@@ -279,8 +278,7 @@ sub _add
                 require Tapper::Benchmark;
 
                 # connect
-                my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-                my $dbh              = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                my $dbh              = _connect($c);
                 my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
 
                 # add data
@@ -317,6 +315,22 @@ sub _are_you_sure
         return 0;
 }
 
+sub _connect
+{
+        my ($c) = @_;
+
+        no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
+
+        # connect
+        my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+        my $user             = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{user};
+        my $password         = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{password};
+        my $dbh              = DBI->connect($dsn, $user, $password, {'RaiseError' => 1})
+         or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+
+        return $dbh;
+}
+
 sub _createdb
 {
         my ($c) = @_;
@@ -339,11 +353,11 @@ sub _createdb
                         use DBIx::MultiStatementDo;
 
                         # connect
-                        my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-                        my $dbh              = DBI->connect($dsn) or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
+                        my $dbh              = _connect($c);
                         my $batch            = DBIx::MultiStatementDo->new(dbh => $dbh);
 
                         # get schema SQL according to driver
+                        my $dsn      = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
                         my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
                          or die "benchmarkanything-storage: can not parse DBI DSN '$dsn'";
                         my $sql_file = File::ShareDir::dist_file('Tapper-Benchmark', "tapper-benchmark-create-schema.$driver");
