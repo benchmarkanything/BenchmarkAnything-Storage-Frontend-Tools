@@ -240,7 +240,7 @@ sub _search
 
                 # connect
                 my $dbh                   = _connect($c);
-                my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
+                my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # query
                 my $benchmarkanythingdata = $tapper_benchmark->search_array($query);
@@ -282,7 +282,7 @@ sub _add
 
                 # connect
                 my $dbh              = _connect($c);
-                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => 1 });
+                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # add data
                 my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
