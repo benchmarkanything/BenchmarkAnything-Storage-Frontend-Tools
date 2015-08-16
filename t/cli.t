@@ -9,6 +9,7 @@ use DBI;
 
 my $program   = "$^X -Ilib bin/benchmarkanything-storage";
 my $cfgfile   = "t/benchmarkanything-tapper.cfg";
+my $dsn       = 'dbi:SQLite:t/benchmarkanything.sqlite';
 my $infile;
 my $input_json;
 my $input;
@@ -52,7 +53,7 @@ sub query_and_verify {
 }
 
 # Create and fill test DB
-command "$program createdb -c $cfgfile --really dbi:SQLite:t/benchmarkanything.sqlite";
+command "$program createdb -c $cfgfile --really $dsn";
 command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
 
 # Search for benchmarks, verify against expectation
