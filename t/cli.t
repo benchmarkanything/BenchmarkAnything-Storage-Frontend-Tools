@@ -57,6 +57,10 @@ query_and_verify("t/query-benchmark-anything-01.json",
                  "t/query-benchmark-anything-01-expectedresult.json",
                  [qw(NAME VALUE)]
                 );
+# query_and_verify("t/query-benchmark-anything-02.json",
+#                  "t/query-benchmark-anything-02-expectedresult.json",
+#                  [qw(NAME VALUE)]
+#                 );
 
 # Finish
 done_testing;
