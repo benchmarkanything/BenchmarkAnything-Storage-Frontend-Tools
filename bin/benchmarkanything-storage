@@ -399,10 +399,12 @@ sub _createdb
 
 __END__
 
-=head1 SYNOPSIS
+=head1 ABOUT
 
 Cmdline tool to handle BenchmarkAnything data, see
 L<http://benchmarkanything.org|http://benchmarkanything.org>
+
+=head1 SYNOPSIS
 
 Default data format (in and out) is JSON, other formats can be
 specified.
