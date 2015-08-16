@@ -25,7 +25,10 @@ sub command {
 }
 
 sub verify {
-        my ($input_json, $output_json, $keys) = @_;
+        my ($input_json, $output_json, $keys, $query_file) = @_;
+
+        require File::Basename;
+        my $basename = File::Basename::basename($query_file, ".json");
 
         my $input  = JSON::decode_json($input_json);
         my $output = JSON::decode_json($output_json);
@@ -34,7 +37,7 @@ sub verify {
                 my $got      = $output->[$i];
                 my $expected = $input->{BenchmarkAnythingData}[$i];
                 foreach my $key (@$keys) {
-                        is($got->{$key},  $expected->{$key},  "re-found [$i].$key");
+                        is($got->{$key},  $expected->{$key},  "$basename - re-found [$i].$key");
                 }
         }
 }
@@ -45,7 +48,7 @@ sub query_and_verify {
 
         my $output_json   = command "$program search -c $cfgfile $query_file";
         my $expected_json = File::Slurp::read_file($expectation_file);
-        verify($expected_json, $output_json, $fields);
+        verify($expected_json, $output_json, $fields, $query_file);
 }
 
 # Create and fill test DB
