@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.001     2015-08-16
         - Initial release - CPAN DAY - 2015-08-16
         - Cmdline tool to handle BenchmarkAnything data on a backend store
         - the only currently supported backend store is Tapper::Benchmark
