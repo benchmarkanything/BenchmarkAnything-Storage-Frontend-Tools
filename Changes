@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.002     2015-08-17
         - more tests
 
 0.001     2015-08-16
