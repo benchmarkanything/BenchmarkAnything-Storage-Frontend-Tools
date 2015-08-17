@@ -9,6 +9,8 @@ use JSON;
 use DBI;
 
 my $program   = "$^X -Ilib bin/benchmarkanything-storage";
+# my $cfgfile   = "t/benchmarkanything-tapper-mysql.cfg";
+# my $dsn       = 'DBI:mysql:database=benchmarkanythingtest';
 my $cfgfile   = "t/benchmarkanything-tapper.cfg";
 my $dsn       = 'dbi:SQLite:t/benchmarkanything.sqlite';
 my $infile;
@@ -53,6 +55,8 @@ sub query_and_verify {
         my $expected_json = File::Slurp::read_file($expectation_file);
         verify($expected_json, $output_json, $fields, $query_file);
 }
+
+diag "Using DSN: '$dsn'";
 
 # Create and fill test DB
 command "$program createdb -c $cfgfile --really $dsn";
