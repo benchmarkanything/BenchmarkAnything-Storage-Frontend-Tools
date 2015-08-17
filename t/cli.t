@@ -37,7 +37,7 @@ sub verify {
         my $input  = JSON::decode_json($input_json);
         my $output = JSON::decode_json($output_json);
 
-        for (my $i=0; $i < @{$input->{BenchmarkAnythingData}}-1; $i++) {
+        for (my $i=0; $i < @{$input->{BenchmarkAnythingData}}; $i++) {
                 my $got      = $output->[$i];
                 my $expected = $input->{BenchmarkAnythingData}[$i];
                 foreach my $field (@$fields) {
