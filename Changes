@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - more tests
 
 0.001     2015-08-16
         - Initial release - CPAN DAY - 2015-08-16
