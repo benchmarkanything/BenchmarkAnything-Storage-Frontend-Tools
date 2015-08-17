@@ -277,7 +277,6 @@ sub _add
 
         if ($c->{_backend} eq "tapper")
         {
-                require DBI;
                 require Tapper::Benchmark;
 
                 # connect
@@ -332,6 +331,7 @@ sub _connect
 {
         my ($c) = @_;
 
+        require DBI;
         no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
 
         # connect

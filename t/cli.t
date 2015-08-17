@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Data::Dumper;
 use Test::More 0.88;
 use File::Slurp;
 use JSON;
@@ -26,7 +27,7 @@ sub command {
 }
 
 sub verify {
-        my ($input_json, $output_json, $keys, $query_file) = @_;
+        my ($input_json, $output_json, $fields, $query_file) = @_;
 
         require File::Basename;
         my $basename = File::Basename::basename($query_file, ".json");
@@ -37,8 +38,9 @@ sub verify {
         for (my $i=0; $i < @{$input->{BenchmarkAnythingData}}-1; $i++) {
                 my $got      = $output->[$i];
                 my $expected = $input->{BenchmarkAnythingData}[$i];
-                foreach my $key (@$keys) {
-                        is($got->{$key},  $expected->{$key},  "$basename - re-found [$i].$key");
+                foreach my $field (@$fields) {
+                        is($got->{$field},  $expected->{$field},  "$basename - re-found [$i].$field = $expected->{$field}");
+                        # diag "got = ".Dumper($got);
                 }
         }
 }
