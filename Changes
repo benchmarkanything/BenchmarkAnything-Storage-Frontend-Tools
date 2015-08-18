@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.003     2015-08-18
         - define config file in env var BENCHMARKANYTHING_CONFIGFILE
         - tests for handling of dupliactes
 
