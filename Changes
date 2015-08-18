@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - define config file in env var BENCHMARKANYTHING_CONFIGFILE
+        - tests for handling of dupliactes
 
 0.002     2015-08-17
         - more tests
