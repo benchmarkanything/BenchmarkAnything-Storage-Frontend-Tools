@@ -80,7 +80,7 @@ sub _getopt
         require YAML::Any;
 
         my $opt = $c->options;
-        my $configfile  = $opt->{cfgfile}  || File::HomeDir->my_home . "/.benchmarkanything.cfg";
+        my $configfile  = $opt->{cfgfile}  || $ENV{BENCHMARKANYTHING_CONFIGFILE} || File::HomeDir->my_home . "/.benchmarkanything.cfg";
         my $configyaml  = File::Slurp::read_file($configfile);
         $c->{_config}   = YAML::Any::Load($configyaml);
         $c->{_backend}  = $opt->{backend}  || 'tapper';
