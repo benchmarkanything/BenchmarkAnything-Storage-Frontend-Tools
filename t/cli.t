@@ -58,6 +58,8 @@ sub query_and_verify {
 
 diag "Using DSN: '$dsn'";
 
+diag "========== Test typical queries ==========";
+
 # Create and fill test DB
 command "$program createdb -c $cfgfile --really $dsn";
 command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
@@ -73,6 +75,20 @@ query_and_verify("t/query-benchmark-anything-02.json",
                 );
 query_and_verify("t/query-benchmark-anything-03.json",
                  "t/query-benchmark-anything-03-expectedresult.json",
+                 [qw(NAME VALUE comment compiler keyword)]
+                );
+
+
+diag "========== Test duplicate handling ==========";
+
+# Create and fill test DB
+command "$program createdb -c $cfgfile --really $dsn";
+# Create duplicates
+command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+
+query_and_verify("t/query-benchmark-anything-04.json",
+                 "t/query-benchmark-anything-04-expectedresult.json",
                  [qw(NAME VALUE comment compiler keyword)]
                 );
 
