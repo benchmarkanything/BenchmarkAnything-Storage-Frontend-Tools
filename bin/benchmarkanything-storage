@@ -271,6 +271,7 @@ sub _add
         }
 
         require BenchmarkAnything::Schema;
+        print "Verify schema...\n" if $c->options->{verbose};
         if (not my $result = BenchmarkAnything::Schema::valid_json_schema($data))
         {
                 die "benchmarkanything-storage: add: invalid input: ".join("; ", $result->errors)."\n";
@@ -284,15 +285,18 @@ sub _add
                 require Tapper::Benchmark;
 
                 # connect
+                print "Connect db...\n" if $c->options->{verbose};
                 my $dbh              = _connect($c);
                 my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # add data
+                print "Add data...\n" if $c->options->{verbose};
                 my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
                 if (not $success)
                 {
                         die "benchmarkanything-storage: error while adding data to backend '".$c->{_backend}."': ".$@;
                 }
+                print "Done.\n" if $c->options->{verbose};
         }
         else
         {
