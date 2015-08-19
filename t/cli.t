@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More 0.88;
+use Test::Deep 'cmp_set';
 use File::Slurp;
 use JSON;
 use DBI;
@@ -91,6 +92,46 @@ query_and_verify("t/query-benchmark-anything-04.json",
                  "t/query-benchmark-anything-04-expectedresult.json",
                  [qw(NAME VALUE comment compiler keyword)]
                 );
+
+diag "\n========== Metric names ==========";
+
+command "$program createdb -c $cfgfile --really $dsn";
+command "$program add      -c $cfgfile t/valid-benchmark-anything-data-02.json";
+
+# simple list
+
+$output_json = command "$program listnames -c $cfgfile";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 5, "expected count of metrics");
+cmp_set($output,
+        [qw(benchmarkanything.test.metric.1
+            benchmarkanything.test.metric.2
+            benchmarkanything.test.metric.3
+            another.benchmarkanything.test.metric.1
+            another.benchmarkanything.test.metric.2
+          )],
+        "re-found metric names");
+
+# list with search pattern
+$output_json = command "$program listnames --pattern 'another%' -c $cfgfile";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 2, "expected count of other metrics");
+cmp_set($output,
+        [qw(another.benchmarkanything.test.metric.1
+            another.benchmarkanything.test.metric.2
+          )],
+        "re-found other metric names");
+
+# list with search pattern
+$output_json = command "$program listnames --pattern 'benchmarkanything%' -c $cfgfile";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 3, "expected count of yet another metrics");
+cmp_set($output,
+        [qw(benchmarkanything.test.metric.1
+            benchmarkanything.test.metric.2
+            benchmarkanything.test.metric.3
+          )],
+        "re-found yet another metric names");
 
 # Finish
 done_testing;
