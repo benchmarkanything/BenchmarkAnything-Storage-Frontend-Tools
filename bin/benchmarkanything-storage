@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb");
+        $c->register_commands("help", "search", "add", "createdb", "listnames");
 }
 
 sub help
@@ -32,8 +32,9 @@ sub help
                           [-c|--cfgfile <FILE>]
                           [-d|--debug]
                           [-v|--verbose]
+                          [-p|--pattern <PATTERN>]
                           [--really <DSN>]
-                          [search|add|createdb] <DATAFILE>
+                          [search|add|createdb|listnames] <DATAFILE>
 
         -i
         --intype         - input format
@@ -43,6 +44,9 @@ sub help
                            [json(default), yaml, dumper]
         -c
         --cfgfile        - config file for storage backend
+
+        -p
+        --pattern        - pattern for 'search' command (using LIKE)
 
         -b
         --backend        - backend
@@ -73,6 +77,7 @@ sub _getopt
                     "backend|b=s",
                     "outtype|o=s",
                     "intype|i=s",
+                    "pattern|p=s",
                     "debug|d",
                     "verbose|v",
                     "really=s",
@@ -113,6 +118,14 @@ sub createdb :Help(drop and create tables in the backend store)
 
         _getopt($c);
         _createdb($c);
+}
+
+sub listnames :Help(list existing metric names)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _listnames($c);
 }
 
 ######################################################################
@@ -223,6 +236,32 @@ sub _write_out
                 die "benchmarkanything-storage: unrecognized output format: $outtype.";
         }
         return $output;
+}
+
+sub _listnames
+{
+        my ($c) = @_;
+
+        if ($c->{_backend} eq "tapper")
+        {
+                require DBI;
+                require Tapper::Benchmark;
+
+                # connect
+                my $dbh                   = _connect($c);
+                my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
+
+                # query
+                my @pattern = defined $c->options->{pattern} ? ($c->options->{pattern}) : ();
+                my $benchmarkanythingdata = $tapper_benchmark->list_benchmark_names(@pattern);
+
+                # output
+                _write_out($c, $benchmarkanythingdata);
+        }
+        else
+        {
+                die "benchmarkanything-storage: backend '.$c->{_backend}.' not yet implemented, available backends are: 'tapper'\n";
+        }
 }
 
 sub _search
