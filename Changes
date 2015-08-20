@@ -1,10 +1,11 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - new command: listnames --pattern, to get list of benchmark NAMEs
 
 0.003     2015-08-18
         - define config file in env var BENCHMARKANYTHING_CONFIGFILE
-        - tests for handling of dupliactes
+        - tests for handling of duplicates
 
 0.002     2015-08-17
         - more tests
