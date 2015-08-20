@@ -57,9 +57,9 @@ sub query_and_verify {
         verify($expected_json, $output_json, $fields, $query_file);
 }
 
-diag "Using DSN: '$dsn'";
+diag "\nUsing DSN: '$dsn'";
 
-diag "========== Test typical queries ==========";
+diag "\n========== Test typical queries ==========";
 
 # Create and fill test DB
 command "$program createdb -c $cfgfile --really $dsn";
@@ -80,7 +80,7 @@ query_and_verify("t/query-benchmark-anything-03.json",
                 );
 
 
-diag "========== Test duplicate handling ==========";
+diag "\n========== Test duplicate handling ==========";
 
 # Create and fill test DB
 command "$program createdb -c $cfgfile --really $dsn";
