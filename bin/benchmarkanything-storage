@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "getpoint");
 }
 
 sub help
@@ -33,8 +33,9 @@ sub help
                           [-d|--debug]
                           [-v|--verbose]
                           [-p|--pattern <PATTERN>]
+                          [--id <VALUE_ID>]
                           [--really <DSN>]
-                          [search|add|createdb|listnames] <DATAFILE>
+                          [search|add|createdb|listnames|getpoint] <DATAFILE>
 
         -i
         --intype         - input format
@@ -46,7 +47,9 @@ sub help
         --cfgfile        - config file for storage backend
 
         -p
-        --pattern        - pattern for 'search' command (using LIKE)
+        --pattern        - pattern for 'listnames' command (using LIKE)
+
+        --id             - search id for 'getpoint' command
 
         -b
         --backend        - backend
@@ -78,6 +81,7 @@ sub _getopt
                     "outtype|o=s",
                     "intype|i=s",
                     "pattern|p=s",
+                    "id=s",
                     "debug|d",
                     "verbose|v",
                     "really=s",
@@ -126,6 +130,14 @@ sub listnames :Help(list existing metric names)
 
         _getopt($c);
         _listnames($c);
+}
+
+sub getpoint :Help(get benchmark point with all existing fields)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _getpoint($c);
 }
 
 ######################################################################
@@ -257,6 +269,33 @@ sub _listnames
 
                 # output
                 _write_out($c, $benchmarkanythingdata);
+        }
+        else
+        {
+                die "benchmarkanything-storage: backend '.$c->{_backend}.' not yet implemented, available backends are: 'tapper'\n";
+        }
+}
+
+sub _getpoint
+{
+        my ($c) = @_;
+
+        if ($c->{_backend} eq "tapper")
+        {
+                require DBI;
+                require Tapper::Benchmark;
+
+                # connect
+                my $dbh              = _connect($c);
+                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
+
+                # query
+                my $id = $c->options->{id};
+                die "benchmarkanything-storage: please provide a benchmark value id using --id'\n";
+                my $point = $tapper_benchmark->list_benchmark_names($id);
+
+                # output
+                _write_out($c, $point);
         }
         else
         {
