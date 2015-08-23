@@ -291,8 +291,9 @@ sub _getpoint
 
                 # query
                 my $id = $c->options->{id};
-                die "benchmarkanything-storage: please provide a benchmark value id using --id'\n";
-                my $point = $tapper_benchmark->list_benchmark_names($id);
+                die "benchmarkanything-storage: please provide a benchmark value id using --id'\n"
+                    unless $id;
+                my $point = $tapper_benchmark->get_single_benchmark_point($id);
 
                 # output
                 _write_out($c, $point);
