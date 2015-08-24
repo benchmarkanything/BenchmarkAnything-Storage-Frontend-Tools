@@ -370,10 +370,12 @@ sub _add
 
                 # add data
                 print "Add data...\n" if $c->options->{verbose};
-                my $success = $tapper_benchmark->add_multi_benchmark($data->{BenchmarkAnythingData});
-                if (not $success)
-                {
+                foreach my $chunk (@{$data->{BenchmarkAnythingData}}) { # ensure order, because T::Benchmark optimizes multi-chunk entries
+                    my $success = $tapper_benchmark->add_multi_benchmark([$chunk]);
+                    if (not $success)
+                    {
                         die "benchmarkanything-storage: error while adding data to backend '".$c->{_backend}."': ".$@;
+                    }
                 }
                 print "Done.\n" if $c->options->{verbose};
         }
