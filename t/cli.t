@@ -145,8 +145,9 @@ command "$program add      -c $cfgfile t/valid-benchmark-anything-data-02.json";
 # full data point
 $output_json = command "$program getpoint --id 2 -c $cfgfile";
 $output      = JSON::decode_json($output_json);
-$expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
 cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "getpoint - expected key/value pairs");
+
+$expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "getpoint - expected key/value");
 
 # Finish
