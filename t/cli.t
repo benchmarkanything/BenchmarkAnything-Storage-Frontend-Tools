@@ -21,6 +21,7 @@ my $inquery_file;
 my $output_json;
 my $output;
 my $expected_json;
+my $expected;
 
 sub command {
         my ($cmd) = @_;
@@ -93,6 +94,7 @@ query_and_verify("t/query-benchmark-anything-04.json",
                  [qw(NAME VALUE comment compiler keyword)]
                 );
 
+
 diag "\n========== Metric names ==========";
 
 command "$program createdb -c $cfgfile --really $dsn";
@@ -132,6 +134,20 @@ cmp_set($output,
             benchmarkanything.test.metric.3
           )],
         "re-found yet another metric names");
+
+
+diag "\n========== Complete single data points ==========";
+
+# Create and fill test DB
+command "$program createdb -c $cfgfile --really $dsn";
+command "$program add      -c $cfgfile t/valid-benchmark-anything-data-02.json";
+
+# full data point
+$output_json = command "$program getpoint --id 2 -c $cfgfile";
+$output      = JSON::decode_json($output_json);
+$expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
+cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "getpoint - expected key/value pairs");
+eq_hash($output, $expected->{BenchmarkAnythingData}[1], "getpoint - expected key/value");
 
 # Finish
 done_testing;
