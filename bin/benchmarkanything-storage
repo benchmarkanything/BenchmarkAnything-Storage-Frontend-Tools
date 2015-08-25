@@ -385,84 +385,11 @@ sub _add
         return;
 }
 
-sub _are_you_sure
-{
-        my ($c) = @_;
-
-        # DSN
-        my $dsn = $c->{_balib}{config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-
-        # option --really
-        if ($c->options->{really})
-        {
-                if ($c->options->{really} eq $dsn)
-                {
-                        return 1;
-                }
-                else
-                {
-                        print STDERR "DSN does not match - asking interactive.\n";
-                }
-        }
-
-        # ask on stdin
-        print "REALLY DELETE AND RE-CREATE DATABASE [$dsn] (y/N): ";
-        read STDIN, my $answer, 1;
-        return 1 if $answer && $answer =~ /^y(es)?$/i;
-
-        # default: NO
-        return 0;
-}
-
 sub _createdb
 {
         my ($c) = @_;
 
-        # --- add to storage ---
-
-        if ($c->{_backend} eq "tapper")
-        {
-                no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
-
-                # backend: tapper
-
-                if (_are_you_sure($c))
-                {
-
-                        require DBI;
-                        require File::Slurp;
-                        require File::ShareDir;
-                        require Tapper::Benchmark;
-                        use DBIx::MultiStatementDo;
-
-                        # connect
-                        my $dbh              = $c->{_balib}->connect->{dbh};
-                        my $batch            = DBIx::MultiStatementDo->new(dbh => $dbh);
-
-                        # get schema SQL according to driver
-                        my $dsn      = $c->{_balib}{config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-                        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
-                         or die "benchmarkanything-storage: can not parse DBI DSN '$dsn'";
-                        my ($dbname) = $driver_dsn =~ m/database=(\w+)/g;
-                        my $sql_file = File::ShareDir::dist_file('Tapper-Benchmark', "tapper-benchmark-create-schema.$driver");
-                        my $sql      = File::Slurp::read_file($sql_file);
-                        $sql         =~ s/^use `testrundb`;/use `$dbname`;/m if $dbname; # replace Tapper::Benchmark's default
-
-                        # execute schema SQL
-                        my @results = $batch->do($sql);
-                        if (not @results)
-                        {
-                                die "benchmarkanything-storage: error while creating DB on backend '".$c->{_backend}."': ".$batch->dbh->errstr;;
-                        }
-                        ;
-                }
-        }
-        else
-        {
-                # backend: unknown
-
-                die "benchmarkanything-storage: backend ".$c->{_backend}." not yet implemented.\nAvailable backends are: 'tapper'\n";
-        }
+        $c->{_balib}->connect->createdb;
 
         return;
 }
