@@ -380,7 +380,7 @@ sub _add
                 die "benchmarkanything-storage: backend ".$c->{_backend}." not yet implemented, available backends are: 'tapper'\n";
         }
 
-        return BenchmarkAnything::Schema::valid_json_schema($data);
+        return;
 }
 
 sub _are_you_sure
