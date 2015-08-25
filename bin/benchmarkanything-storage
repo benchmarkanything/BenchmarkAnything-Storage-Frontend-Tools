@@ -88,14 +88,10 @@ sub _getopt
                   )
          or help() and return undef;
 
-        require File::HomeDir;
-        require File::Slurp;
-        require YAML::Any;
+        require BenchmarkAnything::Storage::Frontend::Lib;
 
         my $opt = $c->options;
-        my $configfile  = $opt->{cfgfile}  || $ENV{BENCHMARKANYTHING_CONFIGFILE} || File::HomeDir->my_home . "/.benchmarkanything.cfg";
-        my $configyaml  = File::Slurp::read_file($configfile);
-        $c->{_config}   = YAML::Any::Load($configyaml);
+        $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile});
         $c->{_backend}  = $opt->{backend}  || 'tapper';
         $c->{_file}     = $c->argv->[0]    || '-';
 }
@@ -260,7 +256,7 @@ sub _listnames
                 require Tapper::Benchmark;
 
                 # connect
-                my $dbh                   = _connect($c);
+                my $dbh                   = $c->{_balib}->connect->{dbh};
                 my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # query
@@ -286,7 +282,7 @@ sub _getpoint
                 require Tapper::Benchmark;
 
                 # connect
-                my $dbh              = _connect($c);
+                my $dbh              = $c->{_balib}->connect->{dbh};
                 my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # query
@@ -322,7 +318,7 @@ sub _search
                 require Tapper::Benchmark;
 
                 # connect
-                my $dbh                   = _connect($c);
+                my $dbh                   = $c->{_balib}->connect->{dbh};
                 my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # query
@@ -365,7 +361,7 @@ sub _add
 
                 # connect
                 print "Connect db...\n" if $c->options->{verbose};
-                my $dbh              = _connect($c);
+                my $dbh              = $c->{_balib}->connect->{dbh};
                 my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
 
                 # add data
@@ -392,7 +388,7 @@ sub _are_you_sure
         my ($c) = @_;
 
         # DSN
-        my $dsn = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+        my $dsn = $c->{_balib}{config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
 
         # option --really
         if ($c->options->{really})
@@ -414,23 +410,6 @@ sub _are_you_sure
 
         # default: NO
         return 0;
-}
-
-sub _connect
-{
-        my ($c) = @_;
-
-        require DBI;
-        no warnings 'once'; # avoid 'Name "DBI::errstr" used only once'
-
-        # connect
-        my $dsn              = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
-        my $user             = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{user};
-        my $password         = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{password};
-        my $dbh              = DBI->connect($dsn, $user, $password, {'RaiseError' => 1})
-         or die "benchmarkanything-storage: can not connect: ".$DBI::errstr;
-
-        return $dbh;
 }
 
 sub _createdb
@@ -455,11 +434,11 @@ sub _createdb
                         use DBIx::MultiStatementDo;
 
                         # connect
-                        my $dbh              = _connect($c);
+                        my $dbh              = $c->{_balib}->connect->{dbh};
                         my $batch            = DBIx::MultiStatementDo->new(dbh => $dbh);
 
                         # get schema SQL according to driver
-                        my $dsn      = $c->{_config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
+                        my $dsn      = $c->{_balib}{config}{benchmarkanything}{backends}{tapper}{benchmark}{dsn};
                         my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn)
                          or die "benchmarkanything-storage: can not parse DBI DSN '$dsn'";
                         my ($dbname) = $driver_dsn =~ m/database=(\w+)/g;
