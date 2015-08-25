@@ -290,32 +290,9 @@ sub _search
         my ($c) = @_;
 
         my $query = _read_in($c);
-
-        # --- validate ---
-        if (not $query)
-        {
-                die "benchmarkanything-storage: no query data provided.\n";
-        }
-
-        if ($c->{_balib}{backend} eq "tapper")
-        {
-                require DBI;
-                require Tapper::Benchmark;
-
-                # connect
-                my $dbh                   = $c->{_balib}->connect->{dbh};
-                my $tapper_benchmark      = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
-
-                # query
-                my $benchmarkanythingdata = $tapper_benchmark->search_array($query);
-
-                # output
-                _write_out($c, $benchmarkanythingdata);
-        }
-        else
-        {
-                die "benchmarkanything-storage: backend '.$c->{_balib}{backend}.' not yet implemented, available backends are: 'tapper'\n";
-        }
+        $c->{_balib}->connect;
+        my $result = $c->{_balib}->search($query);
+        _write_out($c, $result);
 }
 
 sub _add
