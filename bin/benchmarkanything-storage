@@ -300,49 +300,8 @@ sub _add
         my ($c) = @_;
 
         my $data = _read_in($c);
-
-        # --- validate ---
-        if (not $data)
-        {
-                die "benchmarkanything-storage: no input data provided.\n";
-        }
-
-        require BenchmarkAnything::Schema;
-        print "Verify schema...\n" if $c->options->{verbose};
-        if (not my $result = BenchmarkAnything::Schema::valid_json_schema($data))
-        {
-                die "benchmarkanything-storage: add: invalid input: ".join("; ", $result->errors)."\n";
-        }
-
-
-        # --- add to storage ---
-
-        if ($c->{_balib}{backend} eq "tapper")
-        {
-                require Tapper::Benchmark;
-
-                # connect
-                print "Connect db...\n" if $c->options->{verbose};
-                my $dbh              = $c->{_balib}->connect->{dbh};
-                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
-
-                # add data
-                print "Add data...\n" if $c->options->{verbose};
-                foreach my $chunk (@{$data->{BenchmarkAnythingData}}) { # ensure order, because T::Benchmark optimizes multi-chunk entries
-                    my $success = $tapper_benchmark->add_multi_benchmark([$chunk]);
-                    if (not $success)
-                    {
-                        die "benchmarkanything-storage: error while adding data to backend '".$c->{_balib}{backend}."': ".$@;
-                    }
-                }
-                print "Done.\n" if $c->options->{verbose};
-        }
-        else
-        {
-                die "benchmarkanything-storage: backend ".$c->{_balib}{backend}." not yet implemented, available backends are: 'tapper'\n";
-        }
-
-        return;
+        $c->{_balib}->connect;
+        $c->{_balib}->add ($data);
 }
 
 sub _createdb
