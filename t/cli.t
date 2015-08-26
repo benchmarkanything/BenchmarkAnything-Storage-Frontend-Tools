@@ -150,5 +150,14 @@ cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "getpoint - 
 $expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "getpoint - expected key/value");
 
+
+# diag "\n========== Output formats ==========";
+
+# # Create and fill test DB
+# command "$program createdb -c $cfgfile --really $dsn";
+# command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+# my $output_flat = command "$program search -c $cfgfile -o flat --fb --fi t/query-benchmark-anything-03.json";
+# diag $output_flat;
+
 # Finish
 done_testing;

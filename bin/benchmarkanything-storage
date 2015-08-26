@@ -27,8 +27,12 @@ sub help
 {
         my ($c) = @_;
 
-        return qq{benchmarkanything-storage [-o|--outtype <TYPE>]
+        return qq{benchmarkanything-storage
                           [-i|--intype <TYPE>]
+                          [-o|--outtype <TYPE>]
+                          [-s|--separator <SEPARATOR>]
+                          [--fb]
+                          [--fi]
                           [-c|--cfgfile <FILE>]
                           [-d|--debug]
                           [-v|--verbose]
@@ -43,6 +47,17 @@ sub help
         -o
         --outtype        - output format
                            [json(default), yaml, dumper]
+
+        -s
+        --separator      - sub entry separator for output format 'flat'
+                           (default=;)
+
+        --fb             - on output format 'flat' use [brackets] around
+                           outer arrays
+
+        --fi             - on output format 'flat' prefix outer array lines
+                           with index
+
         -c
         --cfgfile        - config file for storage backend
 
@@ -78,8 +93,11 @@ sub _getopt
 
         $c->getopt( "cfgfile|c=s",
                     "backend|b=s",
-                    "outtype|o=s",
                     "intype|i=s",
+                    "outtype|o=s",
+                    "separator|s=s",
+                    "fb",
+                    "fi",
                     "pattern|p=s",
                     "id=s",
                     "debug|d",
@@ -96,6 +114,11 @@ sub _getopt
                                                                          really  => $opt->{really},
                                                                         );
         $c->{_file}     = $c->argv->[0]    || '-';
+        $c->options->{outtype}   ||= 'json';
+        $c->options->{separator} ||= ';';
+        $c->options->{fb}        ||= 0;
+        $c->options->{fi}        ||= 0;
+
 }
 
 sub search :Help(search BenchmarkAnything data)
@@ -205,47 +228,9 @@ This function writes a data structure in requested output format.
 
 sub _write_out
 {
-        my ($c, $benchmarkanythingdata) = @_;
+        my ($c, $data) = @_;
 
-        my $opt = $c->options;
-
-        my $output = "";
-        my $outtype = $opt->{outtype} || 'json';
-        if ($outtype eq "yaml")
-        {
-                require YAML::Any;
-                $output .= YAML::Any::Dump($benchmarkanythingdata);
-        }
-        elsif ($outtype eq "json")
-        {
-                eval "use JSON -convert_blessed_universally";
-                my $json = JSON->new->allow_nonref->pretty->allow_blessed->convert_blessed;
-                $output .= $json->encode($benchmarkanythingdata);
-        }
-        elsif ($outtype eq "ini") {
-                require Config::INI::Serializer;
-                my $ini = Config::INI::Serializer->new;
-                $output .= $ini->serialize($benchmarkanythingdata);
-        }
-        elsif ($outtype eq "dumper")
-        {
-                require Data::Dumper;
-                $output .= Data::Dumper::Dumper($benchmarkanythingdata);
-        }
-        elsif ($outtype eq "xml")
-        {
-                require XML::Simple;
-                my $xs = new XML::Simple;
-                $output .= $xs->XMLout($benchmarkanythingdata, AttrIndent => 1, KeepRoot => 1);
-        }
-        elsif ($outtype eq "flat") {
-                $output .= _format_flat( $c, $benchmarkanythingdata );
-        }
-        else
-        {
-                die "benchmarkanything-storage: unrecognized output format: $outtype.";
-        }
-        return $output;
+        return $c->{_balib}->_output_format($data, $c->options);
 }
 
 sub _listnames
@@ -261,28 +246,9 @@ sub _getpoint
 {
         my ($c) = @_;
 
-        if ($c->{_balib}{backend} eq "tapper")
-        {
-                require DBI;
-                require Tapper::Benchmark;
-
-                # connect
-                my $dbh              = $c->{_balib}->connect->{dbh};
-                my $tapper_benchmark = Tapper::Benchmark->new({dbh => $dbh, debug => $c->options->{debug} });
-
-                # query
-                my $id = $c->options->{id};
-                die "benchmarkanything-storage: please provide a benchmark value id using --id'\n"
-                    unless $id;
-                my $point = $tapper_benchmark->get_single_benchmark_point($id);
-
-                # output
-                _write_out($c, $point);
-        }
-        else
-        {
-                die "benchmarkanything-storage: backend '.$c->{_balib}{backend}.' not yet implemented, available backends are: 'tapper'\n";
-        }
+        $c->{_balib}->connect;
+        my $result = $c->{_balib}->getpoint ($c->options->{id});
+        _write_out($c, $result);
 }
 
 sub _search
@@ -344,6 +310,20 @@ modules used to convert the input into a data structure:
  yaml   - YAML::Any (default)
  json   - JSON
  dumper - Data::Dumper (including the leading $VAR1 variable assignment)
+
+=head2 Output formats
+
+The following B<output formats> are allowed:
+
+ yaml   - YAML::Any
+ json   - JSON (default)
+ xml    - XML::Simple
+ ini    - Config::INI::Serializer
+ dumper - Data::Dumper (including the leading $VAR1 variable assignment)
+ flat   - pragmatic flat output for typical unixish cmdline usage
+
+See L<BenchmarkAnything::Storage::Frontend::Lib/Output formats> for
+more details, especially about the I<flat> output format.
 
 =head1 SEE ALSO
 
