@@ -1,6 +1,10 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - refactoring to use common library
+          use BenchmarkAnything::Storage::Frontend::Lib
+        - new command: getpoint --id
+        - command 'add' now preserves order of points
 
 0.004     2015-08-20
         - new command: listnames --pattern, to get list of benchmark NAMEs
