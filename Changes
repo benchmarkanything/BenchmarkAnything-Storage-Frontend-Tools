@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.005     2015-08-26
         - refactoring to use common library
           use BenchmarkAnything::Storage::Frontend::Lib
         - new command: getpoint --id
