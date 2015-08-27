@@ -22,6 +22,7 @@ my $output_json;
 my $output;
 my $expected_json;
 my $expected;
+my $output_flat;
 
 sub command {
         my ($cmd) = @_;
@@ -151,12 +152,30 @@ $expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-an
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "getpoint - expected key/value");
 
 
-# diag "\n========== Output formats ==========";
+diag "\n========== Output formats ==========";
 
-# # Create and fill test DB
-# command "$program createdb -c $cfgfile --really $dsn";
-# command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
-# my $output_flat = command "$program search -c $cfgfile -o flat --fb --fi t/query-benchmark-anything-03.json";
+# Create and fill test DB
+command "$program createdb -c $cfgfile --really $dsn";
+command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+
+# flat - single result
+$output_flat = command "$program getpoint --id 2 -c $cfgfile -o flat --fb --fi";
+like($output_flat, qr/^0:\[/ms,                              "expected line - line start");
+like($output_flat, qr/\]$/ms,                                "expected line - line end");
+like($output_flat, qr/keyword=zomtec/ms,                     "expected line - key/value 1");
+like($output_flat, qr/NAME=benchmarkanything.test.metric/ms, "expected line - key/value 2");
+like($output_flat, qr/VALUE=34.56789/ms,                     "expected line - key/value 3");
+like($output_flat, qr/comment=another float value/ms,        "expected line - key/value 5");
+like($output_flat, qr/compiler=icc/ms,                       "expected line - key/value 6");
+unlike($output_flat, qr/VALUE_ID=/ms,                        "expected line - without VALUE_ID");
+# diag "\n";
+# diag $output_flat;
+
+# flat - multi result
+$output_flat = command "$program search -c $cfgfile -o flat --fb --fi t/query-benchmark-anything-03.json";
+like($output_flat, qr/^0:\[.*^1:\[.*^2:\[.*^3:\[/ms,         "expected multi line - 4 entries");
+unlike($output_flat, qr/^4/ms,                               "expected multi line - not 5 entries");
+# diag "\n";
 # diag $output_flat;
 
 # Finish
