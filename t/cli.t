@@ -40,9 +40,9 @@ sub verify {
         my $input  = JSON::decode_json($input_json);
         my $output = JSON::decode_json($output_json);
 
-        for (my $i=0; $i < @{$input->{BenchmarkAnythingData}}; $i++) {
+        for (my $i=0; $i < @$input; $i++) {
                 my $got      = $output->[$i];
-                my $expected = $input->{BenchmarkAnythingData}[$i];
+                my $expected = $input->[$i];
                 foreach my $field (@$fields) {
                         is($got->{$field},  $expected->{$field},  "$basename - re-found [$i].$field = $expected->{$field}");
                         # diag "got = ".Dumper($got);
