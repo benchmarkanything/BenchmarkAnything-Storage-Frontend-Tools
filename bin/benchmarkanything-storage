@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "getpoint");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "getpoint", "init");
 }
 
 sub help
@@ -39,7 +39,7 @@ sub help
                           [-p|--pattern <PATTERN>]
                           [--id <VALUE_ID>]
                           [--really <DSN>]
-                          [search|add|createdb|listnames|getpoint] <DATAFILE>
+                          [init|search|add|createdb|listnames|getpoint] <DATAFILE>
 
         -i
         --intype         - input format
@@ -119,6 +119,14 @@ sub _getopt
         $c->options->{fb}        ||= 0;
         $c->options->{fi}        ||= 0;
 
+}
+
+sub init :Help(Initialize a local BenchmarkAnything setup)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _init($c);
 }
 
 sub search :Help(search BenchmarkAnything data)
@@ -276,6 +284,77 @@ sub _createdb
 
         $c->{_balib}->connect;
         $c->{_balib}->createdb;
+        return;
+}
+
+sub _homedir
+{
+        require File::HomeDir;
+        File::HomeDir->my_home;
+}
+
+sub _init_cfgfile {
+        my ($c) = @_;
+
+        my $home       = _homedir;
+        my $home_ba    = "$home/.benchmarkanything";
+        my $configfile = $c->options->{cfgfile} || "$home/.benchmarkanything.cfg";
+        if (-e $configfile) {
+            print STDERR "Config  '$configfile' already exists - skipping.\n";
+        } else {
+            my $initial_content = <<EOF;
+# YAML
+benchmarkanything:
+  #
+  # global preferences
+  #
+  frontend: http
+  backend: tapper
+  #
+  # backends config
+  #
+  backends:
+    tapper:
+      benchmark:
+        dsn: dbi:SQLite:$home/.benchmarkanything/benchmarkanything.sqlite
+  #
+  # frontends config
+  #
+  frontends:
+    http:
+      base_url: http://localhost:3000
+EOF
+
+            print "Create configfile: $configfile\n";
+            open my $CFGFILE, ">", $configfile or die "Could not create $configfile.\n";
+            print $CFGFILE $initial_content;
+            close $CFGFILE;
+        }
+}
+
+sub _init_subdir
+{
+        my ($c) = @_;
+
+        require File::Path;
+        my $home       = _homedir;
+        my $home_ba    = "$home/.benchmarkanything";
+
+        if (-d $home_ba) {
+                print STDERR "Workdir '$home_ba' already exists - skipping.\n";
+        } else {
+                File::Path::make_path($home_ba);
+        }
+        return;
+}
+
+sub _init
+{
+        my ($c) = @_;
+
+        _init_cfgfile($c);
+        _init_subdir($c);
+        return;
 }
 
 __END__
