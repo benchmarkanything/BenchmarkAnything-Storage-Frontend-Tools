@@ -370,17 +370,22 @@ L<http://benchmarkanything.org|http://benchmarkanything.org>
 Default data format (in and out) is JSON, other formats can be
 specified.
 
-Add data to configured backend storage:
+Initialize BenchmarkAnything:
 
-  $ benchmarkanything-storage add data.json
+  $ benchmarkanything-storage init
+
+Create BenchmarkAnything storage database:
+
+  $ benchmarkanything-storage createdb
+
+Add data to backend storage:
+
+  $ benchmarkanything-storage add         data.json
+  $ benchmarkanything-storage add -i yaml data.yaml
 
 Query backend storage for data:
 
   $ echo 'json_search_query' | benchmarkanything-storage search -
-
-Declare input format YAML:
-
-  $ benchmarkanything-storage add -i yaml data.yaml
 
 =head2 Input formats
 
