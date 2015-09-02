@@ -276,6 +276,7 @@ sub _add
         my $data = _read_in($c);
         $c->{_balib}->connect;
         $c->{_balib}->add ($data);
+        return;
 }
 
 sub _createdb
