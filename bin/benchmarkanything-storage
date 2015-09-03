@@ -36,6 +36,7 @@ sub help
                           [-c|--cfgfile <FILE>]
                           [-d|--debug]
                           [-v|--verbose]
+                          [--skipvalidation]
                           [-p|--pattern <PATTERN>]
                           [--id <VALUE_ID>]
                           [--really <DSN>]
@@ -73,6 +74,9 @@ sub help
         --debug          - Pass through debug option to used modules
 
         --verbose        - print what's going on
+
+        --skipvalidation - Disables schema validation checking,
+                           usually for 'add' command.
 
         --really         - used for 'createdb' command.
                            Avoids the 'Are you sure?' question. You need to
@@ -112,6 +116,7 @@ sub _getopt
         $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
                                                                          backend => $opt->{backend} || 'tapper',
                                                                          really  => $opt->{really},
+                                                                         skipvalidation  => $opt->{skipvalidation},
                                                                         );
         $c->{_file}     = $c->argv->[0]    || '-';
         $c->options->{outtype}   ||= 'json';
