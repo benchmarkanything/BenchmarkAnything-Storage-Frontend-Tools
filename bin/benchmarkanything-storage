@@ -70,8 +70,7 @@ sub help
                            is returned with all additional key/value fields.
 
         -b
-        --backend        - backend
-                           [tapper(default), http]
+        --backend        - backend ['tapper' (default)]
 
         --debug          - Pass through debug option to used modules
 
@@ -116,7 +115,6 @@ sub _getopt
 
         my $opt = $c->options;
         $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
-                                                                         backend => $opt->{backend} || 'tapper',
                                                                          really  => $opt->{really},
                                                                          skipvalidation  => $opt->{skipvalidation},
                                                                         );
@@ -308,8 +306,13 @@ benchmarkanything:
   #
   # global preferences
   #
-  frontend: http
-  backend: tapper
+  # frontend: specify which frontend to use
+  #   * http - use HTTP/REST api as provided by
+  #            BenchmarkAnything::Storage::Frontend::HTTP
+  #   * lib - use local Perl library
+  #           BenchmarkAnything::Storage::Frontend::Lib
+  #           (which in turn looks which backend to use)
+  frontend: lib
   #
   # backends config
   #
