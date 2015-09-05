@@ -242,7 +242,6 @@ sub _listnames
 {
         my ($c) = @_;
 
-        $c->{_balib}->connect;
         my $result = $c->{_balib}->listnames ($c->options->{pattern});
         _write_out($c, $result);
 }
@@ -271,7 +270,6 @@ sub _add
         my ($c) = @_;
 
         my $data = _read_in($c);
-        $c->{_balib}->connect;
         $c->{_balib}->add ($data);
         return;
 }
@@ -280,7 +278,6 @@ sub _createdb
 {
         my ($c) = @_;
 
-        $c->{_balib}->connect;
         $c->{_balib}->createdb;
         return;
 }
