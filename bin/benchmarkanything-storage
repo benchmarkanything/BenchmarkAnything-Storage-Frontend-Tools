@@ -296,12 +296,18 @@ sub _init_cfgfile {
         my $configfile = $c->options->{cfgfile} || "$home/.benchmarkanything.cfg";
         if (-e $configfile) {
             print STDERR "Config  '$configfile' already exists - skipping.\n";
-        } else {
-            my $initial_content = <<EOF;
-# YAML
+        }
+        else
+        {
+                my $initial_content = "# YAML
 benchmarkanything:
+  # ------------------------------------------------------------------
+  # If you have your services distributed on different hosts, i.e. use
+  # the HTTP api, then you only need one, either the 'frontend' OR the
+  # 'backend' part of this config, respectively.
+  # ------------------------------------------------------------------
   #
-  # global preferences
+  # --- frontend configuration ---
   #
   # frontend: specify which frontend to use
   #   * http - use HTTP/REST api as provided by
@@ -322,13 +328,13 @@ benchmarkanything:
   #
   frontends:
     http:
-      base_url: http://localhost:3000
-EOF
+      base_url: http://127.0.0.1:3000
+";
 
-            print "Create configfile: $configfile\n";
-            open my $CFGFILE, ">", $configfile or die "Could not create $configfile.\n";
-            print $CFGFILE $initial_content;
-            close $CFGFILE;
+                print "Create configfile: $configfile\n";
+                open my $CFGFILE, ">", $configfile or die "Could not create $configfile.\n";
+                print $CFGFILE $initial_content;
+                close $CFGFILE;
         }
 }
 
