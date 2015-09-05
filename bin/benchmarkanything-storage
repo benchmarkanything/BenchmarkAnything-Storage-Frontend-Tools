@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "getpoint", "init");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "init");
 }
 
 sub help
@@ -40,7 +40,7 @@ sub help
                           [-p|--pattern <PATTERN>]
                           [--id <VALUE_ID>]
                           [--really <DSN>]
-                          [init|search|add|createdb|listnames|getpoint] <DATAFILE>
+                          [init|search|add|createdb|listnames] <DATAFILE>
 
         -i
         --intype         - input format
@@ -65,7 +65,9 @@ sub help
         -p
         --pattern        - pattern for 'listnames' command (using LIKE)
 
-        --id             - search id for 'getpoint' command
+        --id             - search id for 'search' command. When given,
+                           other queries are ignored and the result point
+                           is returned with all additional key/value fields.
 
         -b
         --backend        - backend
@@ -166,14 +168,6 @@ sub listnames :Help(list existing metric names)
         _listnames($c);
 }
 
-sub getpoint :Help(get benchmark point with all existing fields)
-{
-        my ($c) = @_;
-
-        _getopt($c);
-        _getpoint($c);
-}
-
 ######################################################################
 #
 # Implementation
@@ -255,22 +249,22 @@ sub _listnames
         _write_out($c, $result);
 }
 
-sub _getpoint
-{
-        my ($c) = @_;
-
-        $c->{_balib}->connect;
-        my $result = $c->{_balib}->getpoint ($c->options->{id});
-        _write_out($c, $result);
-}
-
 sub _search
 {
         my ($c) = @_;
 
-        my $query = _read_in($c);
-        $c->{_balib}->connect;
-        my $result = $c->{_balib}->search($query);
+        my $result;
+        my $value_id = $c->options->{id};
+
+        # special case: search --id gets a full point with all details
+        if ($value_id) {
+                $result = $c->{_balib}->search(undef, $value_id);
+        }
+        else
+        {
+                my $query = _read_in($c);
+                $result = $c->{_balib}->search($query);
+        }
         _write_out($c, $result);
 }
 
