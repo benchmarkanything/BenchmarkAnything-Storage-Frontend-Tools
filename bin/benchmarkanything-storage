@@ -37,6 +37,7 @@ sub help
                           [-d|--debug]
                           [-v|--verbose]
                           [--skipvalidation]
+                          [--queuemode]
                           [-p|--pattern <PATTERN>]
                           [--id <VALUE_ID>]
                           [--really <DSN>]
@@ -68,6 +69,10 @@ sub help
         --id             - search id for 'search' command. When given,
                            other queries are ignored and the result point
                            is returned with all additional key/value fields.
+
+        --queuemode      - used for 'add' command; values are just enqueued
+                           for later actual processing. This lets
+                           'add' return quicker, gives higher throughput.
 
         -b
         --backend        - backend ['tapper' (default)]
@@ -107,6 +112,8 @@ sub _getopt
                     "id=s",
                     "debug|d",
                     "verbose|v",
+                    "skipvalidation",
+                    "queuemode",
                     "really=s",
                   )
          or help() and return undef;
@@ -117,6 +124,7 @@ sub _getopt
         $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
                                                                          really  => $opt->{really},
                                                                          skipvalidation  => $opt->{skipvalidation},
+                                                                         queuemode       => $opt->{queuemode},
                                                                         );
         $c->{_file}     = $c->argv->[0]    || '-';
         $c->options->{outtype}   ||= 'json';
