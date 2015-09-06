@@ -10,10 +10,14 @@ use JSON;
 use DBI;
 
 my $program   = "$^X -Ilib bin/benchmarkanything-storage";
+
 # my $cfgfile   = "t/benchmarkanything-tapper-mysql.cfg";
 # my $dsn       = 'DBI:mysql:database=benchmarkanythingtest';
 my $cfgfile   = "t/benchmarkanything-tapper.cfg";
 my $dsn       = 'dbi:SQLite:t/benchmarkanything.sqlite';
+
+$ENV{BENCHMARKANYTHING_CONFIGFILE} = $cfgfile;
+
 my $infile;
 my $input_json;
 my $input;
@@ -54,7 +58,7 @@ sub verify {
 sub query_and_verify {
         my ($query_file, $expectation_file, $fields) = @_;
 
-        my $output_json   = command "$program search -c $cfgfile $query_file";
+        my $output_json   = command "$program search $query_file";
         my $expected_json = File::Slurp::read_file($expectation_file);
         verify($expected_json, $output_json, $fields, $query_file);
 }
@@ -64,8 +68,8 @@ diag "\nUsing DSN: '$dsn'";
 diag "\n========== Test typical queries ==========";
 
 # Create and fill test DB
-command "$program createdb -c $cfgfile --really $dsn";
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+command "$program createdb --really $dsn";
+command "$program add      t/valid-benchmark-anything-data-01.json";
 
 # Search for benchmarks, verify against expectation
 query_and_verify("t/query-benchmark-anything-01.json",
@@ -85,10 +89,10 @@ query_and_verify("t/query-benchmark-anything-03.json",
 diag "\n========== Test duplicate handling ==========";
 
 # Create and fill test DB
-command "$program createdb -c $cfgfile --really $dsn";
+command "$program createdb --really $dsn";
 # Create duplicates
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+command "$program add      t/valid-benchmark-anything-data-01.json";
+command "$program add      t/valid-benchmark-anything-data-01.json";
 
 query_and_verify("t/query-benchmark-anything-04.json",
                  "t/query-benchmark-anything-04-expectedresult.json",
@@ -98,12 +102,12 @@ query_and_verify("t/query-benchmark-anything-04.json",
 
 diag "\n========== Metric names ==========";
 
-command "$program createdb -c $cfgfile --really $dsn";
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-02.json";
+command "$program createdb --really $dsn";
+command "$program add      t/valid-benchmark-anything-data-02.json";
 
 # simple list
 
-$output_json = command "$program listnames -c $cfgfile";
+$output_json = command "$program listnames";
 $output      = JSON::decode_json($output_json);
 is(scalar @$output, 5, "expected count of metrics");
 cmp_set($output,
@@ -116,7 +120,7 @@ cmp_set($output,
         "re-found metric names");
 
 # list with search pattern
-$output_json = command "$program listnames --pattern 'another%' -c $cfgfile";
+$output_json = command "$program listnames --pattern 'another%'";
 $output      = JSON::decode_json($output_json);
 is(scalar @$output, 2, "expected count of other metrics");
 cmp_set($output,
@@ -126,7 +130,7 @@ cmp_set($output,
         "re-found other metric names");
 
 # list with search pattern
-$output_json = command "$program listnames --pattern 'benchmarkanything%' -c $cfgfile";
+$output_json = command "$program listnames --pattern 'benchmarkanything%'";
 $output      = JSON::decode_json($output_json);
 is(scalar @$output, 3, "expected count of yet another metrics");
 cmp_set($output,
@@ -140,26 +144,26 @@ cmp_set($output,
 diag "\n========== Complete single data points ==========";
 
 # Create and fill test DB
-command "$program createdb -c $cfgfile --really $dsn";
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-02.json";
+command "$program createdb --really $dsn";
+command "$program add      t/valid-benchmark-anything-data-02.json";
 
 # full data point
-$output_json = command "$program getpoint --id 2 -c $cfgfile";
+$output_json = command "$program search --id 2";
 $output      = JSON::decode_json($output_json);
-cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "getpoint - expected key/value pairs");
+cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "search ID - expected key/value pairs");
 
 $expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
-eq_hash($output, $expected->{BenchmarkAnythingData}[1], "getpoint - expected key/value");
+eq_hash($output, $expected->{BenchmarkAnythingData}[1], "search ID - expected key/value");
 
 
 diag "\n========== Output formats ==========";
 
 # Create and fill test DB
-command "$program createdb -c $cfgfile --really $dsn";
-command "$program add      -c $cfgfile t/valid-benchmark-anything-data-01.json";
+command "$program createdb --really $dsn";
+command "$program add      t/valid-benchmark-anything-data-01.json";
 
 # flat - single result
-$output_flat = command "$program getpoint --id 2 -c $cfgfile -o flat --fb --fi";
+$output_flat = command "$program search --id 2 -o flat --fb --fi";
 like($output_flat, qr/^0:\[/ms,                              "expected line - line start");
 like($output_flat, qr/\]$/ms,                                "expected line - line end");
 like($output_flat, qr/keyword=zomtec/ms,                     "expected line - key/value 1");
@@ -172,7 +176,7 @@ unlike($output_flat, qr/VALUE_ID=/ms,                        "expected line - wi
 # diag $output_flat;
 
 # flat - multi result
-$output_flat = command "$program search -c $cfgfile -o flat --fb --fi t/query-benchmark-anything-03.json";
+$output_flat = command "$program search -o flat --fb --fi t/query-benchmark-anything-03.json";
 like($output_flat, qr/^0:\[.*^1:\[.*^2:\[.*^3:\[/ms,         "expected multi line - 4 entries");
 unlike($output_flat, qr/^4/ms,                               "expected multi line - not 5 entries");
 # diag "\n";
