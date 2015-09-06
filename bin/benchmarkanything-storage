@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "init");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "processqueue", "init");
 }
 
 sub help
@@ -41,7 +41,7 @@ sub help
                           [-p|--pattern <PATTERN>]
                           [--id <VALUE_ID>]
                           [--really <DSN>]
-                          [init|search|add|createdb|listnames] <DATAFILE>
+                          [init|search|add|createdb|listnames|processqueue] <DATAFILE>
 
         -i
         --intype         - input format
@@ -174,6 +174,14 @@ sub listnames :Help(list existing metric names)
         _listnames($c);
 }
 
+sub processqueue :Help(Works on the result queue created by add --queuemode)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _processqueue($c);
+}
+
 ######################################################################
 #
 # Implementation
@@ -253,6 +261,16 @@ sub _listnames
         my $result = $c->{_balib}->listnames ($c->options->{pattern});
         _write_out($c, $result);
 }
+
+
+sub _processqueue
+{
+        my ($c) = @_;
+
+        $c->{_balib}->process_raw_result_queue(100);
+        return;
+}
+
 
 sub _search
 {
