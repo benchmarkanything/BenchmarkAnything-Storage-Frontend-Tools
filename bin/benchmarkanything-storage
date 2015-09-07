@@ -23,6 +23,13 @@ sub setup
         $c->register_commands("help", "search", "add", "createdb", "listnames", "processqueue", "init");
 }
 
+sub teardown
+{
+        my $c = shift;
+
+        _disconnect($c);
+}
+
 sub help
 {
         my ($c) = @_;
@@ -95,6 +102,13 @@ sub help
                            + for 'add' it is BenchmarkAnything data
                            + for 'createdb' no input data is used
 };
+}
+
+sub _disconnect
+{
+        my ($c) = @_;
+
+        $c->{_balib}->disconnect;
 }
 
 sub _getopt
