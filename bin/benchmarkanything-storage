@@ -84,7 +84,7 @@ sub help
         -b
         --backend        - backend ['tapper' (default)]
 
-        --debug          - Pass through debug option to used modules
+        --debug          - Pass through 'debug' option to used modules
 
         --verbose        - print what's going on
 
@@ -102,6 +102,20 @@ sub help
                            + for 'add' it is BenchmarkAnything data
                            + for 'createdb' no input data is used
 };
+}
+
+sub _connect
+{
+        my ($c) = @_;
+
+        require BenchmarkAnything::Storage::Frontend::Lib;
+
+        my $opt = $c->options;
+        $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
+                                                                         really  => $opt->{really},
+                                                                         skipvalidation  => $opt->{skipvalidation},
+                                                                         queuemode       => $opt->{queuemode},
+                                                                        );
 }
 
 sub _disconnect
@@ -132,15 +146,16 @@ sub _getopt
                   )
          or help() and return undef;
 
-        require BenchmarkAnything::Storage::Frontend::Lib;
+        _connect($c);
+        _set_defaults($c);
+}
 
-        my $opt = $c->options;
-        $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
-                                                                         really  => $opt->{really},
-                                                                         skipvalidation  => $opt->{skipvalidation},
-                                                                         queuemode       => $opt->{queuemode},
-                                                                        );
-        $c->{_file}     = $c->argv->[0]    || '-';
+
+sub _set_defaults
+{
+        my ($c) = @_;
+
+        $c->{_file}                = $c->argv->[0] || '-';
         $c->options->{outtype}   ||= 'json';
         $c->options->{separator} ||= ';';
         $c->options->{fb}        ||= 0;
