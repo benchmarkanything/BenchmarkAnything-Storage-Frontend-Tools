@@ -1,6 +1,18 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - new option: add --skipvalidation - for higher throughput
+        - new option: add --queuemode - for higher throughput, queues
+          results for later processing
+        - new command: processqueue - to process a batch from that queue
+          (batchsize currently fixed to 100)
+        - new command: gc - garbage collect the processed entries
+          (yet mostly for safety reasons, until the queue transaction
+          handling is waterproof)
+        - new command: init - initializes config files for an easy
+          start
+        - internal refactoring, eg., connect/disconnect handling
+        - more tests
 
 0.005     2015-08-26
         - refactoring to use common library
