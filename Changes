@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.006     2015-09-09
         - new option: add --skipvalidation - for higher throughput
         - new option: add --queuemode - for higher throughput, queues
           results for later processing
