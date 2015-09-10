@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - INCOMPATIBLE CHANGE: Config keys completely restructure
 
 0.006     2015-09-09
         - new option: add --skipvalidation - for higher throughput
