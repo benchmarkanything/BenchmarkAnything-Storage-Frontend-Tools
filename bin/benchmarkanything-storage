@@ -357,84 +357,17 @@ sub _createdb
         return;
 }
 
-sub _homedir
-{
-        require File::HomeDir;
-        File::HomeDir->my_home;
-}
-
-sub _init_cfgfile {
-        my ($c) = @_;
-
-        my $home       = _homedir;
-        my $home_ba    = "$home/.benchmarkanything";
-        my $configfile = $c->options->{cfgfile} || "$home/.benchmarkanything.cfg";
-        if (-e $configfile) {
-            print STDERR "Config  '$configfile' already exists - skipping.\n";
-        }
-        else
-        {
-                my $initial_content = "# YAML
-benchmarkanything:
-  # ------------------------------------------------------------------
-  # If you have your services distributed on different hosts, i.e. use
-  # the HTTP api, then you only need one, either the 'frontend' OR the
-  # 'backend' part of this config, respectively.
-  # ------------------------------------------------------------------
-  #
-  # --- frontend configuration ---
-  #
-  # frontend: specify which frontend to use
-  #   * http - use HTTP/REST api as provided by
-  #            BenchmarkAnything::Storage::Frontend::HTTP
-  #   * lib - use local Perl library
-  #           BenchmarkAnything::Storage::Frontend::Lib
-  #           (which in turn looks which backend to use)
-  frontend: lib
-  #
-  # backends config
-  #
-  backends:
-    tapper:
-      benchmark:
-        dsn: dbi:SQLite:$home/.benchmarkanything/benchmarkanything.sqlite
-  #
-  # frontends config
-  #
-  frontends:
-    http:
-      base_url: http://127.0.0.1:3000
-";
-
-                print "Create configfile: $configfile\n";
-                open my $CFGFILE, ">", $configfile or die "Could not create $configfile.\n";
-                print $CFGFILE $initial_content;
-                close $CFGFILE;
-        }
-}
-
-sub _init_subdir
-{
-        my ($c) = @_;
-
-        require File::Path;
-        my $home       = _homedir;
-        my $home_ba    = "$home/.benchmarkanything";
-
-        if (-d $home_ba) {
-                print STDERR "Workdir '$home_ba' already exists - skipping.\n";
-        } else {
-                File::Path::make_path($home_ba);
-        }
-        return;
-}
-
 sub _init
 {
         my ($c) = @_;
 
-        _init_cfgfile($c);
-        _init_subdir($c);
+        my $old_verbose = $c->{_balib}{verbose};
+        $c->{_balib}{verbose} = 1;
+
+        $c->{_balib}->init_workdir;
+
+        $c->{_balib}{verbose} = $old_verbose;
+
         return;
 }
 
