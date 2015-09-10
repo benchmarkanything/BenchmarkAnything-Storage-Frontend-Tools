@@ -27,7 +27,7 @@ sub teardown
 {
         my $c = shift;
 
-        _disconnect($c);
+        _disconnect($c) unless $c->cmd =~ /^init|help$/;
 }
 
 sub help
@@ -111,18 +111,23 @@ sub _connect
         require BenchmarkAnything::Storage::Frontend::Lib;
 
         my $opt = $c->options;
-        $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new(cfgfile => $opt->{cfgfile},
-                                                                         really  => $opt->{really},
-                                                                         skipvalidation  => $opt->{skipvalidation},
-                                                                         queuemode       => $opt->{queuemode},
-                                                                        );
+        $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new
+         (cfgfile         => $opt->{cfgfile},
+          really          => $opt->{really},
+          skipvalidation  => $opt->{skipvalidation},
+          queuemode       => $opt->{queuemode},
+          ($c->cmd =~ /^init|help$/ ?
+           ( noconnect    => 1,
+             noconfig     => 1,
+           ) : ()),
+         );
 }
 
 sub _disconnect
 {
         my ($c) = @_;
 
-        $c->{_balib}->disconnect;
+        $c->{_balib}->disconnect if $c->{_balib}; # balib is undef on getopt errors
 }
 
 sub _getopt
