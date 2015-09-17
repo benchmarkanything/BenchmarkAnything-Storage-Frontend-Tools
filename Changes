@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - adapt to renamed DB backend
+          (Tapper::Benchmark -> BenchmarkAnything::Storage::Backend::SQL)
 
 0.007     2015-09-10
         - INCOMPATIBLE CHANGE: Config keys completely restructure
