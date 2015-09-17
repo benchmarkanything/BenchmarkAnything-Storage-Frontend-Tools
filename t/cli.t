@@ -11,9 +11,9 @@ use DBI;
 
 my $program   = "$^X -Ilib bin/benchmarkanything-storage";
 
-# my $cfgfile   = "t/benchmarkanything-tapper-mysql.cfg";
+# my $cfgfile   = "t/benchmarkanything-mysql.cfg";
 # my $dsn       = 'DBI:mysql:database=benchmarkanythingtest';
-my $cfgfile   = "t/benchmarkanything-tapper.cfg";
+my $cfgfile   = "t/benchmarkanything.cfg";
 my $dsn       = 'dbi:SQLite:t/benchmarkanything.sqlite';
 
 $ENV{BENCHMARKANYTHING_CONFIGFILE} = $cfgfile;

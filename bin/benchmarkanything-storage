@@ -82,7 +82,7 @@ sub help
                            'add' return quicker, gives higher throughput.
 
         -b
-        --backend        - backend ['tapper' (default)]
+        --backend        - backend ['sql' (default)]
 
         --debug          - Pass through 'debug' option to used modules
 
