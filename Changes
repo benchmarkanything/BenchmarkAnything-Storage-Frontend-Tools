@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.009     2015-09-20
         - declare dependency version to avoid incompatible config structure
 
 0.008     2015-09-17
