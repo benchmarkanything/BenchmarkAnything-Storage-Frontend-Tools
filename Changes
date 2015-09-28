@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - replace File::Slurp with File::Slurper
 
 0.009     2015-09-20
         - declare dependency version to avoid incompatible config structure
