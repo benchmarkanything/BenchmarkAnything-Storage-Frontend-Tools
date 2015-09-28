@@ -5,7 +5,7 @@ use warnings;
 use Data::Dumper;
 use Test::More 0.88;
 use Test::Deep 'cmp_set';
-use File::Slurp;
+use File::Slurper;
 use JSON;
 use DBI;
 
@@ -59,7 +59,7 @@ sub query_and_verify {
         my ($query_file, $expectation_file, $fields) = @_;
 
         my $output_json   = command "$program search $query_file";
-        my $expected_json = File::Slurp::read_file($expectation_file);
+        my $expected_json = File::Slurper::read_text($expectation_file);
         verify($expected_json, $output_json, $fields, $query_file);
 }
 
@@ -152,7 +152,7 @@ $output_json = command "$program search --id 2";
 $output      = JSON::decode_json($output_json);
 cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "search ID - expected key/value pairs");
 
-$expected    = JSON::decode_json("".File::Slurp::read_file('t/valid-benchmark-anything-data-02.json'));
+$expected    = JSON::decode_json(File::Slurper::read_text('t/valid-benchmark-anything-data-02.json'));
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "search ID - expected key/value");
 
 
