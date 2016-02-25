@@ -141,6 +141,30 @@ cmp_set($output,
         "re-found yet another metric names");
 
 
+diag "\n========== Additional key names ==========";
+
+command "$program createdb --really $dsn";
+command "$program add      t/valid-benchmark-anything-data-02.json";
+
+# simple list
+$output_json = command "$program listkeys";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 3, "expected count of additional key names");
+cmp_set($output, [qw(comment compiler keyword )], "re-found additional key names");
+
+# list with search pattern
+$output_json = command "$program listkeys --pattern 'com%'";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 2, "expected count of other additional key names");
+cmp_set($output, [qw(comment compiler)], "re-found other additional key names");
+
+# list with search pattern
+$output_json = command "$program listkeys --pattern '%wor%'";
+$output      = JSON::decode_json($output_json);
+is(scalar @$output, 1, "expected count of yet another additional key names");
+cmp_set($output, [qw( keyword)], "re-found yet another additional key names");
+
+
 diag "\n========== Complete single data points ==========";
 
 # Create and fill test DB
