@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "processqueue", "gc", "init");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "processqueue", "gc", "init");
 }
 
 sub teardown
@@ -208,6 +208,14 @@ sub listnames :Help(list existing metric names)
         _listnames($c);
 }
 
+sub listkeys :Help(list existing additional key names)
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _listkeys($c);
+}
+
 sub processqueue :Help(Works on the result queue created by add --queuemode)
 {
         my ($c) = @_;
@@ -304,6 +312,13 @@ sub _listnames
         _write_out($c, $result);
 }
 
+sub _listkeys
+{
+        my ($c) = @_;
+
+        my $result = $c->{_balib}->listkeys ($c->options->{pattern});
+        _write_out($c, $result);
+}
 
 sub _processqueue
 {
