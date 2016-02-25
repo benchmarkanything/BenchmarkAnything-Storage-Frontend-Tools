@@ -35,72 +35,94 @@ sub help
         my ($c) = @_;
 
         return qq{benchmarkanything-storage
-                          [-i|--intype <TYPE>]
-                          [-o|--outtype <TYPE>]
-                          [-s|--separator <SEPARATOR>]
-                          [--fb]
-                          [--fi]
-                          [-c|--cfgfile <FILE>]
-                          [-d|--debug]
-                          [-v|--verbose]
-                          [--skipvalidation]
-                          [--queuemode]
-                          [-p|--pattern <PATTERN>]
-                          [--id <VALUE_ID>]
-                          [--really <DSN>]
-                          [init|search|add|createdb|listnames|processqueue|gc] <DATAFILE>
+    [-i|--intype <TYPE>]
+    [-o|--outtype <TYPE>]
+    [-s|--separator <SEPARATOR>]
+    [--fb]
+    [--fi]
+    [-c|--cfgfile <FILE>]
+    [-d|--debug]
+    [-v|--verbose]
+    [--skipvalidation]
+    [--queuemode]
+    [-p|--pattern <PATTERN>]
+    [--id <VALUE_ID>]
+    [--really <DSN>]
+    [init|search|add|createdb|listnames|listkeys|processqueue|gc]
+    <DATAFILE>
 
-        -i
-        --intype         - input format
-                           [json(default), yaml, dumper]
-        -o
-        --outtype        - output format
-                           [json(default), yaml, dumper]
+  Sub commands:
 
-        -s
-        --separator      - sub entry separator for output format 'flat'
-                           (default=;)
+    init            - Initialize a local BenchmarkAnything setup.
 
-        --fb             - on output format 'flat' use [brackets] around
-                           outer arrays
+    search          - Search BenchmarkAnything data.
 
-        --fi             - on output format 'flat' prefix outer array lines
-                           with index
+    add             - Add one or more BenchmarkAnything entries.
 
-        -c
-        --cfgfile        - config file for storage backend
+    createdb        - Drop and create tables in the backend store.
 
-        -p
-        --pattern        - pattern for 'listnames' command (using LIKE)
+    listnames       - List existing metric names.
 
-        --id             - search id for 'search' command. When given,
-                           other queries are ignored and the result point
-                           is returned with all additional key/value fields.
+    listkeys        - List existing additional key names.
 
-        --queuemode      - used for 'add' command; values are just enqueued
-                           for later actual processing. This lets
-                           'add' return quicker, gives higher throughput.
+    processqueue    - Works on the result queue created by add --queuemode.
 
-        -b
-        --backend        - backend ['sql' (default)]
+    gc              - Garbage collects artefacts in the backend store.
 
-        --debug          - Pass through 'debug' option to used modules
 
-        --verbose        - print what's going on
+  Options:
 
-        --skipvalidation - Disables schema validation checking,
-                           usually for 'add' command.
+    -i
+    --intype         - input format
+                       [json(default), yaml, dumper]
+    -o
+    --outtype        - output format
+                       [json(default), yaml, dumper]
 
-        --really         - used for 'createdb' command.
-                           Avoids the 'Are you sure?' question. You need to
-                           provide the DSN from config that createdb would use,
-                           to avoid painful mistakes.
+    -s
+    --separator      - sub entry separator for output format 'flat'
+                       (default=;)
 
-        <DATAFILE>       - input data file ("-" for STDIN)
-                           Content depends on the sub command:
-                           + for 'search' it is a search query
-                           + for 'add' it is BenchmarkAnything data
-                           + for 'createdb' no input data is used
+    --fb             - on output format 'flat' use [brackets] around
+                       outer arrays
+
+    --fi             - on output format 'flat' prefix outer array lines
+                       with index
+
+    -c
+    --cfgfile        - config file for storage backend
+
+    -p
+    --pattern        - pattern for 'listnames'/'listkeys' commands (using LIKE)
+
+    --id             - search id for 'search' command. When given,
+                       other queries are ignored and the result point
+                       is returned with all additional key/value fields.
+
+    --queuemode      - used for 'add' command; values are just enqueued
+                       for later actual processing. This lets
+                       'add' return quicker, gives higher throughput.
+
+    -b
+    --backend        - backend ['sql' (default)]
+
+    --debug          - Pass through 'debug' option to used modules
+
+    --verbose        - print what's going on
+
+    --skipvalidation - Disables schema validation checking,
+                       usually for 'add' command.
+
+    --really         - used for 'createdb' command.
+                       Avoids the 'Are you sure?' question. You need to
+                       provide the DSN from config that createdb would use,
+                       to avoid painful mistakes.
+
+    <DATAFILE>       - input data file ("-" for STDIN)
+                       Content depends on the sub command:
+                       + for 'search' it is a search query
+                       + for 'add' it is BenchmarkAnything data
+                       + for 'createdb' no input data is used
 };
 }
 
