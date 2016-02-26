@@ -244,6 +244,7 @@ sub processqueue :Help(Works on the result queue created by add --queuemode)
 
         _getopt($c);
         _processqueue($c);
+        _gc($c);
 }
 
 sub gc :Help(Garbage collects artefacts in the backend store)
