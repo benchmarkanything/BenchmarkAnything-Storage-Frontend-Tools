@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - always 'gc' after 'processqueue'
 
 0.010     2015-09-28
         - replace File::Slurp with File::Slurper
