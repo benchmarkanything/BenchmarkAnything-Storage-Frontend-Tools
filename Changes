@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.011     2016-02-26
         - always 'gc' after 'processqueue'
 
 0.010     2015-09-28
