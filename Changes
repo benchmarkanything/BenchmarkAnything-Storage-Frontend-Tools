@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.012     2016-03-01
         - more detailed MySQL setup instructions
 
 0.011     2016-02-26
