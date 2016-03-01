@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - more detailed MySQL setup instructions
 
 0.011     2016-02-26
         - always 'gc' after 'processqueue'
