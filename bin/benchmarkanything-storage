@@ -421,22 +421,72 @@ L<http://benchmarkanything.org|http://benchmarkanything.org>
 Default data format (in and out) is JSON, other formats can be
 specified.
 
-Initialize BenchmarkAnything:
+=over 4
+
+=item * Initialize BenchmarkAnything:
 
   $ benchmarkanything-storage init
 
-Create BenchmarkAnything storage database:
+=item * OPTIONAL: Configure MySQL
+
+Iff you want to use MySQL instead of the default SQLite, then edit the
+just created C<~/.benchmarkanything/default.cfg> and in the section
+
+ benchmarkanything:
+  backend: local
+  storage:
+    backend:
+      sql:
+        dsn: dbi:SQLite:...
+        #dsn: DBI:mysql:database=benchmarkanything
+        #user: benchmarker
+        #password: secret
+        ...
+
+comment out the I<dsn:dbi:SQLite...> line and uncomment the
+I<dsn:DBI:mysql...> and corresponding I<user:> and I<password:>
+lines, so it now looks like:
+
+ benchmarkanything:
+  backend: local
+  storage:
+    backend:
+      sql:
+        #dsn: dbi:SQLite:...
+        dsn: DBI:mysql:database=benchmarkanything
+        user: benchmarker
+        password: secret
+        ...
+
+And yes, choose a better password!
+
+Then initialize you MySQL like this:
+
+ $ sudo apt-get install mysql-server-5.6 mysql-client-5.6
+ $ mysql -u root -p
+   mysql> create database if not exists benchmarkanything;
+   mysql> create user 'benchmarker'@'localhost' identified by 'secret';
+   mysql> grant all privileges on benchmarkanything.* to 'benchmarker'@'localhost';
+   mysql> flush privileges;
+   mysql> quit;
+
+=item * Create BenchmarkAnything storage database:
 
   $ benchmarkanything-storage createdb
 
-Add data to backend storage:
+This will ask if you are sure before it creates the actual db with
+tables.
+
+=item * Add data to backend storage:
 
   $ benchmarkanything-storage add         data.json
   $ benchmarkanything-storage add -i yaml data.yaml
 
-Query backend storage for data:
+=item * Query backend storage for data:
 
   $ echo 'json_search_query' | benchmarkanything-storage search -
+
+=back
 
 =head2 Input formats
 
