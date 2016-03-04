@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - new command 'stats' - counters of points and metrics
 
 0.013     2016-03-02
         - explicitely versioned dependencies declared
