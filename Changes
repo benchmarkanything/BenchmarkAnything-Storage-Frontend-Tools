@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.015     2017-01-17
         - fix tests to work with more default entries from backend
 
 0.014     2016-03-04
