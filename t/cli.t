@@ -174,7 +174,7 @@ command "$program add      t/valid-benchmark-anything-data-02.json";
 # full data point
 $output_json = command "$program search --id 2";
 $output      = JSON::decode_json($output_json);
-cmp_set([keys %$output], [qw(NAME VALUE comment compiler keyword)], "search ID - expected key/value pairs");
+cmp_set([keys %$output], [qw(NAME VALUE VALUE_ID CREATED_AT comment compiler keyword)], "search ID - expected key/value pairs");
 
 $expected    = JSON::decode_json(File::Slurper::read_text('t/valid-benchmark-anything-data-02.json'));
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "search ID - expected key/value");
@@ -195,7 +195,6 @@ like($output_flat, qr/NAME=benchmarkanything.test.metric/ms, "expected line - ke
 like($output_flat, qr/VALUE=34.56789/ms,                     "expected line - key/value 3");
 like($output_flat, qr/comment=another float value/ms,        "expected line - key/value 5");
 like($output_flat, qr/compiler=icc/ms,                       "expected line - key/value 6");
-unlike($output_flat, qr/VALUE_ID=/ms,                        "expected line - without VALUE_ID");
 # diag "\n";
 # diag $output_flat;
 
