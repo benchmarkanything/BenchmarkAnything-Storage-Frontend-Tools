@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "stats", "processqueue", "gc", "init");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "stats", "processqueue", "syncsearch", "gc", "init");
 }
 
 sub teardown
@@ -42,13 +42,15 @@ sub help
     [--fi]
     [-c|--cfgfile <FILE>]
     [-d|--debug]
+    [-f|--force]
     [-v|--verbose]
     [--skipvalidation]
     [--queuemode]
+    [--bulkcount <COUNT>]
     [-p|--pattern <PATTERN>]
     [--id <VALUE_ID>]
     [--really <DSN>]
-    [init|search|add|createdb|listnames|listkeys|stats|processqueue|gc]
+    [init|search|add|createdb|listnames|listkeys|stats|processqueue|syncsearch|gc]
     <DATAFILE>
 
   Sub commands:
@@ -68,6 +70,8 @@ sub help
     stats           - Show counts of data points, metrics, keys, etc.
 
     processqueue    - Works on the result queue created by add --queuemode.
+
+    syncsearch      - Syncs the DB with the configured search engine (Elasticsearch).
 
     gc              - Garbage collects artefacts in the backend store.
 
@@ -111,6 +115,11 @@ sub help
     --debug          - Pass through 'debug' option to used modules
 
     --verbose        - print what's going on
+
+    --force          - Force the respective command.
+                       + for 'syncsearch' it means to (re-)index all
+
+    --bulkcount      - Chunk size for 'syncsearch'.
 
     --skipvalidation - Disables schema validation checking,
                        usually for 'add' command.
@@ -168,7 +177,9 @@ sub _getopt
                     "pattern|p=s",
                     "id=s",
                     "debug|d",
+                    "force|f",
                     "verbose|v",
+                    "bulkcount=i",
                     "skipvalidation",
                     "queuemode",
                     "really=s",
@@ -254,6 +265,15 @@ sub processqueue :Help(Works on the result queue created by add --queuemode)
 
         _getopt($c);
         _processqueue($c);
+        _gc($c);
+}
+
+sub syncsearch :Help(Syncs the DB with the configured search engine (Elasticsearch))
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _sync_search_engine($c);
         _gc($c);
 }
 
@@ -366,6 +386,14 @@ sub _processqueue
         my ($c) = @_;
 
         $c->{_balib}->process_raw_result_queue(100);
+        return;
+}
+
+sub _sync_search_engine
+{
+        my ($c) = @_;
+
+        $c->{_balib}->sync_search_engine($c->options->{force}, 1, $c->options->{bulkcount});
         return;
 }
 
