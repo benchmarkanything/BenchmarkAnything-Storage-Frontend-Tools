@@ -112,6 +112,7 @@ sub help
     -b
     --backend        - backend ['sql' (default)]
 
+    -d
     --debug          - Pass through 'debug' option to used modules
 
     --verbose        - print what's going on
@@ -147,6 +148,7 @@ sub _connect
         $c->{_balib}    = BenchmarkAnything::Storage::Frontend::Lib->new
          (cfgfile         => $opt->{cfgfile},
           really          => $opt->{really},
+          debug           => $opt->{debug},
           skipvalidation  => $opt->{skipvalidation},
           queuemode       => $opt->{queuemode},
           ($c->cmd =~ /^init|help$/ ?
