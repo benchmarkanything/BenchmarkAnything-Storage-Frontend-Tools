@@ -20,7 +20,7 @@ sub setup
 {
         my $c = shift;
         $c->unregister_command("help");
-        $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "stats", "processqueue", "syncsearch", "gc", "init");
+        $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "stats", "processqueue", "initsearch", "syncsearch", "gc", "init");
 }
 
 sub teardown
@@ -50,7 +50,7 @@ sub help
     [-p|--pattern <PATTERN>]
     [--id <VALUE_ID>]
     [--really <DSN>]
-    [init|search|add|createdb|listnames|listkeys|stats|processqueue|syncsearch|gc]
+    [init|search|add|createdb|listnames|listkeys|stats|processqueue|initsearch|syncsearch|gc]
     <DATAFILE>
 
   Sub commands:
@@ -70,6 +70,8 @@ sub help
     stats           - Show counts of data points, metrics, keys, etc.
 
     processqueue    - Works on the result queue created by add --queuemode.
+
+    initsearch      - Initializes the configured search engine (Elasticsearch).
 
     syncsearch      - Syncs the DB with the configured search engine (Elasticsearch).
 
@@ -117,7 +119,8 @@ sub help
 
     --verbose        - print what's going on
 
-    --force          - Force the respective command.
+    --force          - Force the respective command
+                       + for 'initsearch' it means to delete and re-create the index
                        + for 'syncsearch' it means to (re-)index all
 
     --bulkcount      - Chunk size for 'syncsearch'.
@@ -151,7 +154,7 @@ sub _connect
           debug           => $opt->{debug},
           skipvalidation  => $opt->{skipvalidation},
           queuemode       => $opt->{queuemode},
-          ($c->cmd =~ /^init|help$/ ?
+          ($c->cmd =~ /^(init|help)$/ ?
            ( noconnect    => 1,
              noconfig     => 1,
            ) : ()),
@@ -267,6 +270,15 @@ sub processqueue :Help(Works on the result queue created by add --queuemode)
 
         _getopt($c);
         _processqueue($c);
+        _gc($c);
+}
+
+sub initsearch :Help(Initializes the configured search engine (Elasticsearch))
+{
+        my ($c) = @_;
+
+        _getopt($c);
+        _init_search_engine($c);
         _gc($c);
 }
 
@@ -388,6 +400,14 @@ sub _processqueue
         my ($c) = @_;
 
         $c->{_balib}->process_raw_result_queue(100);
+        return;
+}
+
+sub _init_search_engine
+{
+        my ($c) = @_;
+
+        $c->{_balib}->init_search_engine($c->options->{force});
         return;
 }
 
