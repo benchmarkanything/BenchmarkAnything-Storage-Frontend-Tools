@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - Elasticsearch support
 
 0.015     2017-01-17
         - fix tests to work with more default entries from backend
