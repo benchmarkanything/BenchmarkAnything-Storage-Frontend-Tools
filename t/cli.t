@@ -174,7 +174,7 @@ command "$program add      t/valid-benchmark-anything-data-02.json";
 # full data point
 $output_json = command "$program search --id 2";
 $output      = JSON::decode_json($output_json);
-cmp_set([keys %$output], [qw(NAME VALUE VALUE_ID CREATED_AT comment compiler keyword)], "search ID - expected key/value pairs");
+cmp_set([keys %$output], [qw(NAME VALUE VALUE_ID CREATED comment compiler keyword)], "search ID - expected key/value pairs");
 
 $expected    = JSON::decode_json(File::Slurper::read_text('t/valid-benchmark-anything-data-02.json'));
 eq_hash($output, $expected->{BenchmarkAnythingData}[1], "search ID - expected key/value");
