@@ -46,6 +46,7 @@ sub help
     [-v|--verbose]
     [--skipvalidation]
     [--queuemode]
+    [--startid <VALUE_ID>]
     [--bulkcount <COUNT>]
     [-p|--pattern <PATTERN>]
     [--id <VALUE_ID>]
@@ -123,7 +124,9 @@ sub help
                        + for 'initsearch' it means to delete and re-create the index
                        + for 'syncsearch' it means to (re-)index all
 
-    --bulkcount      - Chunk size for 'syncsearch'.
+    --startid        - Starting VALUE_ID for 'syncsearch' (default 1).
+
+    --bulkcount      - Chunk size for 'syncsearch' (default 10000).
 
     --skipvalidation - Disables schema validation checking,
                        usually for 'add' command.
@@ -184,6 +187,7 @@ sub _getopt
                     "debug|d",
                     "force|f",
                     "verbose|v",
+                    "startid=i",
                     "bulkcount=i",
                     "skipvalidation",
                     "queuemode",
@@ -415,7 +419,10 @@ sub _sync_search_engine
 {
         my ($c) = @_;
 
-        $c->{_balib}->sync_search_engine($c->options->{force}, 1, $c->options->{bulkcount});
+        my $force     = $c->options->{force}     || 0;
+        my $startid   = $c->options->{startid}   || 1;
+        my $bulkcount = $c->options->{bulkcount} || 10_000;
+        $c->{_balib}->sync_search_engine($force, $startid, $bulkcount);
         return;
 }
 
