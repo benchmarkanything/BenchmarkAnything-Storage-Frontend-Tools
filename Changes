@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.016     2017-01-31
         - Elasticsearch support
 
 0.015     2017-01-17
