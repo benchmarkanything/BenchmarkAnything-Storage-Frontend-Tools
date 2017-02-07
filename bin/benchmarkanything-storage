@@ -21,6 +21,8 @@ sub setup
         my $c = shift;
         $c->unregister_command("help");
         $c->register_commands("help", "search", "add", "createdb", "listnames", "listkeys", "stats", "processqueue", "initsearch", "syncsearch", "gc", "init");
+        $c->register('search-sync' => \&syncsearch);
+        $c->register('search-init' => \&initsearch);
 }
 
 sub teardown
@@ -52,7 +54,7 @@ sub help
     [-p|--pattern <PATTERN>]
     [--id <VALUE_ID>]
     [--really <DSN>]
-    [init|search|add|createdb|listnames|listkeys|stats|processqueue|initsearch|syncsearch|gc]
+    [init|search|add|createdb|listnames|listkeys|stats|processqueue|search-init|search-sync|gc]
     <DATAFILE>
 
   Sub commands:
@@ -73,9 +75,9 @@ sub help
 
     processqueue    - Works on the result queue created by add --queuemode.
 
-    initsearch      - Initializes the configured search engine (Elasticsearch).
+    search-init     - Initializes the configured search engine (Elasticsearch).
 
-    syncsearch      - Syncs the DB with the configured search engine (Elasticsearch).
+    search-sync     - Syncs the DB with the configured search engine (Elasticsearch).
 
     gc              - Garbage collects artefacts in the backend store.
 
@@ -121,12 +123,12 @@ sub help
     --verbose        - print what's going on
 
     --force          - Force the respective command
-                       + for 'initsearch' it means to delete and re-create the index
-                       + for 'syncsearch' it means to (re-)index all
+                       + for 'search-init' it means to delete and re-create the index
+                       + for 'search-sync' it means to (re-)index all
 
-    --startid        - Starting VALUE_ID for 'syncsearch' (default 1).
+    --startid        - Starting VALUE_ID for 'search-sync' (default 1).
 
-    --bulkcount      - Chunk size for 'syncsearch' (default 10000).
+    --bulkcount      - Chunk size for 'search-sync' (default 10000).
 
     --skipvalidation - Disables schema validation checking,
                        usually for 'add' command.
