@@ -41,7 +41,8 @@ sub help
     [--fb]
     [--fi]
     [-c|--cfgfile <FILE>]
-    [-d|--debug]
+    [--debug]
+    [-d|--data]
     [-f|--force]
     [-v|--verbose]
     [--skipvalidation]
@@ -115,7 +116,6 @@ sub help
     -b
     --backend        - backend ['sql' (default)]
 
-    -d
     --debug          - Pass through 'debug' option to used modules
 
     --verbose        - print what's going on
@@ -136,7 +136,10 @@ sub help
                        provide the DSN from config that createdb would use,
                        to avoid painful mistakes.
 
-    <DATAFILE>       - input data file ("-" for STDIN)
+    -d
+    --data           - Data [instead of DATAFILE].
+
+    <DATAFILE>       - input data file ("-" for STDIN) unless --data is given
                        Content depends on the sub command:
                        + for 'search' it is a search query
                        + for 'add' it is BenchmarkAnything data
@@ -184,7 +187,8 @@ sub _getopt
                     "fi",
                     "pattern|p=s",
                     "id=s",
-                    "debug|d",
+                    "debug",
+                    "data|d=s",
                     "force|f",
                     "verbose|v",
                     "startid=i",
@@ -329,7 +333,10 @@ sub _read_in
         my $filecontent;
         {
                 local $/;
-                if ($file eq '-') {
+                if (defined $opt->{data}) {
+                        $filecontent = $opt->{data};
+                }
+                elsif ($file eq '-') {
                         $filecontent = <STDIN>;
                 }
                 else
