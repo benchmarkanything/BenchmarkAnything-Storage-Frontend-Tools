@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - require latest ::Backend::SQL
 
 0.017     2017-02-07
         - INCOMPATIBLE OPTION CHANGE:
