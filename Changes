@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.017     2017-02-07
         - INCOMPATIBLE OPTION CHANGE:
           option -d no longer means --debug but is now --data (similar to curl)
         - new option: -d|--data STRING
