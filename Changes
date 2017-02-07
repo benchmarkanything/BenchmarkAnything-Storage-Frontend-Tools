@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - INCOMPATIBLE OPTION CHANGE:
+          option -d no longer means --debug but is now --data (similar to curl)
+        - new option: -d|--data STRING
 
 0.016     2017-01-31
         - Elasticsearch support
