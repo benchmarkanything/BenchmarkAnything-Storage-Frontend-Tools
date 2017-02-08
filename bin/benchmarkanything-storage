@@ -160,6 +160,7 @@ sub _connect
          (cfgfile         => $opt->{cfgfile},
           really          => $opt->{really},
           debug           => $opt->{debug},
+          verbose         => $opt->{verbose},
           skipvalidation  => $opt->{skipvalidation},
           queuemode       => $opt->{queuemode},
           ($c->cmd =~ /^(init|help)$/ ?

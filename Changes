@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - pass through 'verbose' option
 
 0.018     2017-02-07
         - require latest ::Backend::SQL
