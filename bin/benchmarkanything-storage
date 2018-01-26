@@ -128,7 +128,8 @@ sub help
 
     --startid        - Starting VALUE_ID for 'search-sync' (default 1).
 
-    --bulkcount      - Chunk size for 'search-sync' (default 10000).
+    --bulkcount      - Chunk size for 'search-sync' (default 10000)
+                       or for 'processqueue' (default 100).
 
     --skipvalidation - Disables schema validation checking,
                        usually for 'add' command.
@@ -413,7 +414,8 @@ sub _processqueue
 {
         my ($c) = @_;
 
-        $c->{_balib}->process_raw_result_queue(100);
+        my $bulkcount = $c->options->{bulkcount} || 100;
+        $c->{_balib}->process_raw_result_queue($bulkcount);
         return;
 }
 
