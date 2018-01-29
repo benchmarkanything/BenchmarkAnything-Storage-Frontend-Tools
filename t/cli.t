@@ -212,7 +212,7 @@ command "$program createdb --really $dsn";
 command "$program add      t/valid-benchmark-anything-data-02.json";
 
 # full data point
-$output_json = command "$program stats";
+$output_json = command "$program stats -v";
 $output      = JSON::decode_json($output_json);
 is($output->{count_datapoints}, 8, "stats - count data points");
 is($output->{count_metrics},    5, "stats - count metrics");
