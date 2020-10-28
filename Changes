@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - how stupid can I be?
 
 0.021     2020-10-28
         - drop nytprof files from distro
