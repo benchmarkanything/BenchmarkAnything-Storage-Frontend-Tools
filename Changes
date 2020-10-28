@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - drop nytprof files from distro
 
 0.020     2020-10-28
         - fix stats tests to use verbose
