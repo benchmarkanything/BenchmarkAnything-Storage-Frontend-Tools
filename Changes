@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.022     2020-10-28
         - how stupid can I be?
 
 0.021     2020-10-28
